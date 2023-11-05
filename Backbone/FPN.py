@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
-# import sys
-# sys.path.append(r"E:\20231\DATN\detectron2_rebuild\Backbone")
-# from ResNet50 import Resnet50
+
 
 C = 256
 class FPN(nn.Module):

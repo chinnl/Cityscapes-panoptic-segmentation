@@ -5,8 +5,8 @@ from typing import List, Tuple, Union
 from torch import device
 import numpy as np
 
-import sys
-sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
+# import sys
+# sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
 from structures import Boxes, Instances
 from layers import cat, batched_nms
 
@@ -190,7 +190,7 @@ def find_top_rpn_proposal(
 
 if __name__ == "__main__":
     from structures import *
-    sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
+    # sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
     from Backbone import FPN, R50
     H = 800
     W = 600

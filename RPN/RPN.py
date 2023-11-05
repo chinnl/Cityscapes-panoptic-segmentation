@@ -5,8 +5,8 @@ from .box_regression import Box2BoxTransform, _dense_box_regression_loss
 from .matcher import Matcher
 from typing import List, Tuple, Dict
 
-import sys
-sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
+# import sys
+# sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
 from Backbone import FPN, R50
 from layers import Conv2d, ShapeSpec, cat
 from structures import ImageList, Instances, pairwise_iou
@@ -29,24 +29,22 @@ class RPN_Head(nn.Module):
     '''
     def __init__(self, box_dims, num_cell_anchors) -> None:
         super(RPN_Head, self).__init__()
-        self.box_dims = box_dims
-        self.num_cell_anchors = num_cell_anchors
-        # anchor_sizes = (32,64,128,256,512)
-        # anchor_ratio = (0.5, 1.0, 2.0)
-        # anchor_ratios = []
-        # for i in range(len(anchor_sizes)):
-        #     anchor_ratios.append(anchor_ratio)
-        # self.Anchor_Generator = Anchor_Generator(anchor_sizes, anchor_ratios, strides = 1, offset = 0.5)
-        pass
-    
+        
+        self.feature_emb_conv = nn.Conv2d(C, C, kernel_size = 3, bias = False, padding = 1)
+        self.norm1 = nn.BatchNorm2d(C)
+        
+        self.objness_logit_conv = nn.Conv2d(C, out_channels = 3, kernel_size = 1, bias = False)
+
+        self.anchor_delta_conv = nn.Conv2d(C, box_dims*num_cell_anchors, kernel_size = 1, bias = False)
+        
     def forward(self, input_features):
         #input_features: list of feature maps
         pred_objectness_logits = []
         pred_anchor_deltas = []
         emb_features = []
         for feature_map in input_features:
-            emb_feature = nn.Conv2d(C, C, kernel_size = 3, bias = False, padding = 1)(feature_map)
-            emb_feature = nn.BatchNorm2d(C)(emb_feature)
+            emb_feature = self.feature_emb_conv(feature_map)
+            emb_feature = self.norm1(emb_feature)
             emb_features.append(emb_feature)
             
         pred_objectness_logits = self.get_objectness_logit(emb_features)
@@ -58,15 +56,15 @@ class RPN_Head(nn.Module):
     def get_objectness_logit(self, features):
         objectness_logits = []
         for feature in features:
-            obj_logit = nn.Conv2d(C, out_channels = 3, kernel_size = 1, bias = False)(feature)
-            obj_logit == nn.ReLU()(obj_logit)
+            obj_logit = self.objness_logit_conv(feature)
+            obj_logit = nn.ReLU()(obj_logit)
             objectness_logits.append(obj_logit)
         return objectness_logits
     
     def get_anchor_delta(self, features):
         pred_anchor_deltas = []
         for feature in features:
-            feature = nn.Conv2d(C, self.box_dims*self.num_cell_anchors, kernel_size = 1, bias = False)(feature)
+            feature = self.anchor_delta_conv(feature)
             feature = nn.ReLU()(feature)
             pred_anchor_deltas.append(feature)
         return pred_anchor_deltas
