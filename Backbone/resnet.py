@@ -1,8 +1,5 @@
 import torch
 import torch.nn as nn
-import sys
-# sys.path.append(r"E:\20231\DATN\detectron2_rebuild\Backbone")
-from backbone_utils import *
 
 class R50(nn.Module):
     def __init__(self) -> None:
@@ -30,7 +27,13 @@ class R50(nn.Module):
         res4 = self.layer3(res3)
         res5 = self.layer4(res4)
         
-        output = [res5, res4, res3, res2]
+        # output = [res5, res4, res3, res2]
+        output = {
+            'res5': res5,
+            'res4': res4,
+            'res3': res3,
+            'res2': res2,
+        }
         return output
     
     def make_layers(self, block, num_res_blocks, out_channels, stride):
@@ -83,5 +86,5 @@ if __name__ == '__main__':
     W = 600
     input = torch.zeros((5,3, H, W), dtype = torch.float)
     output = R50().forward(input)
-    for op in output:
-        print(op.shape)
+    for name, features in output.items():
+        print(features.shape)

@@ -5,8 +5,8 @@ from typing import List, Tuple, Union
 from torch import device
 import numpy as np
 
-# import sys
-# sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
+import sys
+sys.path.append(r"E:\20231\DATN\Cityscapes-panoptic-segmentation")
 from structures import Boxes, Instances
 from layers import cat, batched_nms
 
@@ -42,10 +42,16 @@ class Anchor_Generator(nn.Module):
         self.aspect_ratios = aspect_ratios
         self.offset = offset
         
-    def forward(self, input_features):
-        grid_sizes = [input_feature.shape[2:] for input_feature in input_features]
+    def forward(self, input_features, scaling_factors):
+        grid_sizes = [input_feature.shape[2:] for _, input_feature in input_features.items()]
         grid_anchors = self.generate_grid_anchors(grid_sizes, self.anchor_sizes, self.aspect_ratios)
-        return [Boxes(x) for x in grid_anchors]
+        # return [Boxes(x) for x in grid_anchors]
+        anchors = []
+        for anchor, scaling_factor in zip(grid_anchors, scaling_factors):
+            anchor = Boxes(anchor)
+            anchor.scale(scaling_factor, scaling_factor)
+            anchors.append(anchor)
+        return anchors
         
     def generate_cell_anchors(self, sizes, aspect_ratios):
         anchors = []
@@ -67,6 +73,7 @@ class Anchor_Generator(nn.Module):
         for (grid_size, anchor_size) in zip(grid_sizes, anchor_sizes):
             '''
             - grid_size = (grid_h, grid_w)
+            - image_size = Tuple(int(), int()) #(H, W)
             - anchor_sizes = int (anchor area)
             - aspect_ratios = (0.5, 1.0, 2.0)
             '''
@@ -175,7 +182,7 @@ def find_top_rpn_proposal(
         
         keep = boxes.nonempty(threshold=min_box_size)
         if keep.sum().item() != len(boxes):
-            boxes, scores_per_img, lvl = boxes[keep], scores_per_img[keep], lvl[keep]
+            boxes, scores_per_img, level = boxes[keep], scores_per_img[keep], level[keep]
             
         keep = batched_nms(boxes.tensor, scores_per_img, level, nms_thresh)
         keep = keep[:post_nms_topk]
@@ -190,18 +197,17 @@ def find_top_rpn_proposal(
 
 if __name__ == "__main__":
     from structures import *
-    # sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
     from Backbone import FPN, R50
     H = 800
     W = 600
     input = torch.zeros((2,3, H, W), dtype = torch.float)
-    backbone = R50()
-    features = FPN(backbone).forward(input)
+    features = R50().forward(input)
+    output = FPN(features).forward()
     anchor_generator = Anchor_Generator(anchor_sizes=[32,64,128,256,512],
                                         aspect_ratios=(0.5, 1.0, 2.0),
                                         strides=1,
                                         offset=0.5)
-    anchors = anchor_generator.forward(features)
+    anchors = anchor_generator.forward(output, (4,8,16,32,64))
     print(len(anchors))
     for anchor_list in anchors:
         print(len(anchor_list))

@@ -42,7 +42,7 @@ class RPN_Head(nn.Module):
         pred_objectness_logits = []
         pred_anchor_deltas = []
         emb_features = []
-        for feature_map in input_features:
+        for _, feature_map in input_features.items():
             emb_feature = self.feature_emb_conv(feature_map)
             emb_feature = self.norm1(emb_feature)
             emb_features.append(emb_feature)
@@ -104,8 +104,9 @@ class RPN(nn.Module):
         self.smooth_l1_beta = smooth_l1_beta
         self.box2box_transform = box2box_transform
         self.training = is_training
-    def forward(self, images: ImageList, features, gt_instances: Instances):
-        anchors = self.anchor_generator.forward(features) #List of L Boxes where
+        
+    def forward(self, images: ImageList, features: Dict[str, torch.tensor], gt_instances: Instances):
+        anchors = self.anchor_generator.forward(features, (4,8,16,32,64)) #List of L Boxes where
                                                         #each Boxes element is a tensor in shape 
                                                         #(A*Hi*Wi,4)
         pred_objectness_logits, pred_anchor_deltas = self.rpn_head.forward(features)
@@ -226,10 +227,11 @@ class RPN(nn.Module):
         
         fg_mask = gt_labels == 1
         
+        num_images = len(gt_labels)
+        num_fg_anchors = fg_mask.sum().item()
+        num_bg_anchors = (gt_labels == 0).sum().item()
+        
         with EventStorage() as storage:
-            num_images = len(gt_labels)
-            num_fg_anchors = fg_mask.sum().item()
-            num_bg_anchors = (gt_labels == 0).sum().item()
         # storage = get_event_storage()
             storage.put_scalar("rpn/num_fg_anchors", num_fg_anchors/num_images)
             storage.put_scalar("rpn/num_bg_anchors", num_bg_anchors/num_images)
