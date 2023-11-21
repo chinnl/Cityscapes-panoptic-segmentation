@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from typing import Tuple, List, Dict, Optional
 from structures import Instances, Boxes, pairwise_iou, ImageList
-from .head_utils import add_ground_truth_to_proposals, subsample_labels
+from .head_utils import add_ground_truth_to_proposals, subsample_labels, select_foreground_proposals
 from ..utils.events import get_event_storage
 
 class ROI_Head(nn.Module):
@@ -112,3 +112,109 @@ class ROI_Head(nn.Module):
                                                         # - gt_masks
     ) -> Tuple[List[Instances], Dict[str, torch.tensor]]:
         raise NotImplementedError()
+    
+    
+class Standard_ROI_Heads(ROI_Head):
+    def __init__(
+        self,
+        *,
+        box_in_features: List[str], #List of feature names to use for the box head
+        box_pooler: ROI_Pooler, #Pooler to extra region features for box head
+        box_head: nn.Module, #transform features to make box predictions
+        box_predictor: nn.Module, #make box predictions from the features.
+        mask_in_features: Optional[List[str]] = None, #list of feature names to use for mask pooler or mask head
+        mask_pooler: Optional[ROI_Pooler] = None, #pooler to extract region features from image features. 
+                                                #The mask head will then take region  features to make predictions
+        mask_head: Optional[nn.Module] = None, #transform features to make mask predictions
+        train_on_pred_boxes: bool = False, #whether to use proposal boxes or predicted boxes from the box head to train other heads
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.in_features = self.box_in_features = box_in_features
+        self.box_pooler = box_pooler
+        self.box_head = box_head
+        self.box_predictor = box_predictor
+        
+        self.mask_on = mask_in_features is not None
+        if self.mask_on:
+            self.mask_in_features = mask_in_features
+            self.mask_pooler = mask_pooler
+            self.mask_head = mask_head
+        self.train_on_pred_boxes = train_on_pred_boxes
+    
+    def forward(
+        self,
+        images: ImageList,
+        features: Dict[str, torch.tensor],
+        proposals: Optional[List[Instances]],
+        targets: Optional[List[Instances]] = None,  
+    ) -> Tuple[List[Instances], Dict[str, torch.tensor]]:
+        
+        del images
+        if self.training:
+            assert targets, 'No targets found'
+            proposals = self.label_and_sample_proposals(proposals, targets)
+        del targets
+        
+        if self.training:
+            losses = self._forward_box(features, proposals)
+            losses.update(self._forward_mask(features, proposals))
+            return proposals, losses
+        else:
+            pred_instances = self._forward_box(features, proposals)
+            pred_instances = self.forward_with_given_boxes(features, pred_instances)
+            return pred_instances, {}
+    
+    def forward_with_given_boxes(
+        self,
+        features: Dict[str, torch.tensor],
+        instances: List[Instances],
+    ) -> List[Instances]:
+        assert not self.training
+        assert instances[0].has("pred_boxes") and instances[0].has("pred_classes")
+        
+        instances = self._forward_mask(features, instances)
+        return instances
+    
+    def _forward_box(
+        self, 
+        features: Dict[str, torch.tensor],
+        proposals: List[Instances],
+    ):
+        features = [features[f] for f in self.box_in_features]
+        box_features = self.box_pooler(features, [x.proposal_boxes for x in proposals])
+        box_features = self.box_head(box_features)
+        predictions = self.box_predictor(box_features)
+        del box_features
+        if self.training:
+            losses = self.box_predictor.losses(predictions, proposals)
+            if self.train_on_pred_boxes:
+                with torch.no_grad():
+                    pred_boxes = self.box_predictor.predict_boxes_for_gt_classes(
+                        predictions, proposals
+                    )
+                    for proposals_per_image, pred_boxes_per_image in zip(proposals, pred_boxes):
+                        proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
+            return losses
+        else:
+            pred_instances, _ = self.box_predictor.inference(predictions, proposals)
+            return pred_instances
+        
+    def _forward_mask(
+        self,
+        features: Dict[str, torch.tensor],
+        instances: List[Instances],
+    ):
+        if not self.mask_on:
+            instances, _ = select_foreground_proposals(instances, self.num_classes)
+        
+        if self.mask_pooler is not None:
+            features = [features[f] for f in self.mask_in_features]
+            boxes = [x.proposal_boxes if self.training else x.pred_boxes for x in instances]
+            features = self.mask_pooler(features, boxes)
+        
+        else:
+            features = {f: features[f] for f in self.mask_in_features}
+        
+        return self.mask_head(features, instances)
+            

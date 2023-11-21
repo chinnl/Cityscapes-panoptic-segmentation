@@ -71,3 +71,24 @@ def add_ground_truth_to_proposals_single_image(
     
     new_proposals = Instances.cat([proposals, gt_proposal])
     return new_proposals
+
+def select_foreground_proposals(
+    proposals: List[Instances],
+    bg_label: int,
+) -> Tuple[List[Instances], List[Instances]]:
+    
+    assert isinstance(proposals, (list, tuple)), " `proposals` value must be a list or a tuple"
+    assert isinstance(proposals[0], Instances), " Each proposal must be an Instances"
+    assert proposals[0].has("gt_classes"), "Each proposal must contains gt_classes field"
+    
+    fg_proposals = []
+    fg_selection_masks = []
+    for proposal_per_image in proposals:
+        gt_classes = proposal_per_image.gt_classes
+        fg_selection_mask = (gt_classes != -1) & (gt_classes != bg_label)
+        fg_idxs = fg_selection_mask.nonzero().squeeze(1)
+        fg_proposals.append(proposal_per_image[fg_idxs])
+        fg_selection_masks.append(fg_selection_mask)
+    return fg_proposals, fg_selection_masks
+    
+    
