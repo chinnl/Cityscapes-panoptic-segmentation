@@ -6,7 +6,7 @@ import numpy as np
 from typing import Tuple, List, Dict, Optional
 from structures import Instances, Boxes, pairwise_iou, ImageList
 from .head_utils import add_ground_truth_to_proposals, subsample_labels, select_foreground_proposals
-from ..utils.events import get_event_storage
+from utils.events import get_event_storage
 
 class ROI_Head(nn.Module):
     '''

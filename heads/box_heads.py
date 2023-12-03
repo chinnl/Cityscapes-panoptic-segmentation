@@ -65,7 +65,7 @@ class Fast_RCNN_Output_Layers(nn.Module):
                  cls_agnostic_bbox_reg: bool = False,
                  smooth_l1_beta: float = 0.0,
                  box_reg_loss_type: str = "smooth_l1", #Box regression loss type. One of: "smooth_l1", "giou","diou", "ciou"
-                 loss_weight: Union[float, Dict[str, float]], #A single float for all losses or: 
+                 loss_weight: Union[float, Dict[str, float]] = 1.0, #A single float for all losses or: 
                                                         #* "loss_cls": applied to classification loss
                                                         # * "loss_box_reg": applied to box regression loss
                  use_fed_loss: bool = False, #whether to use federated loss which samples additional negative classes to calculate the loss

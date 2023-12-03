@@ -19,7 +19,7 @@ def move_device_like(src: torch.Tensor, dst: torch.Tensor) -> torch.Tensor:
     return src.to(dst.device)
 
 class Anchor_Generator(nn.Module):
-    def __init__(self, anchor_sizes, aspect_ratios, strides, offset):
+    def __init__(self, anchor_sizes, aspect_ratios: List[float], strides: List[int], offset = 0.5):
         super(Anchor_Generator, self).__init__()
         """
         Args:
@@ -42,16 +42,10 @@ class Anchor_Generator(nn.Module):
         self.aspect_ratios = aspect_ratios
         self.offset = offset
         
-    def forward(self, input_features, scaling_factors):
+    def forward(self, input_features):
         grid_sizes = [input_feature.shape[2:] for _, input_feature in input_features.items()]
-        grid_anchors = self.generate_grid_anchors(grid_sizes, self.anchor_sizes, self.aspect_ratios)
-        # return [Boxes(x) for x in grid_anchors]
-        anchors = []
-        for anchor, scaling_factor in zip(grid_anchors, scaling_factors):
-            anchor = Boxes(anchor)
-            anchor.scale(scaling_factor, scaling_factor)
-            anchors.append(anchor)
-        return anchors
+        grid_anchors = self.generate_grid_anchors(grid_sizes)
+        return [Boxes(x) for x in grid_anchors]
         
     def generate_cell_anchors(self, sizes, aspect_ratios):
         anchors = []
@@ -68,9 +62,9 @@ class Anchor_Generator(nn.Module):
                 anchors.append([-a_w/2.0, -a_h/2.0, a_w/2.0, a_h/2.0])
         return torch.tensor(anchors)
     
-    def generate_grid_anchors(self, grid_sizes, anchor_sizes, aspect_ratios):
+    def generate_grid_anchors(self, grid_sizes):
         anchors = []
-        for (grid_size, anchor_size) in zip(grid_sizes, anchor_sizes):
+        for (grid_size, stride, anchor_size) in zip(grid_sizes, self.strides, self.anchor_sizes):
             '''
             - grid_size = (grid_h, grid_w)
             - image_size = Tuple(int(), int()) #(H, W)
@@ -79,8 +73,8 @@ class Anchor_Generator(nn.Module):
             '''
             base_anchors = self.generate_cell_anchors(
                             anchor_size, 
-                            aspect_ratios) #3 base anchor with corresponding ratio 0.5, 1.0 and 2.0
-            shift_x, shift_y = self.create_grid_offset(grid_size, self.strides, self.offset, base_anchors)
+                            self.aspect_ratios) #3 base anchor with corresponding ratio 0.5, 1.0 and 2.0
+            shift_x, shift_y = self.create_grid_offset(grid_size, stride, self.offset, base_anchors)
             shifts = torch.stack((shift_x, shift_y, shift_x, shift_y), dim = 1)
             anchors.append((shifts.view(-1, 1, 4) + base_anchors.view(1, -1, 4)).reshape(-1, 4))
         return anchors
@@ -90,13 +84,9 @@ class Anchor_Generator(nn.Module):
         Create offset grid for each anchor
         '''
         grid_h, grid_w = grid_size
-        shift_x = move_device_like(torch.arange(offset*stride, grid_w, 
-                                                #grid_w*stride, but changed to grid_w 
-                                                #because if stride>1 then the anchors' coordinates
-                                                # are bigger than feature maps' sizes.
+        shift_x = move_device_like(torch.arange(offset*stride, grid_w*stride, 
                                                 step = stride, dtype = torch.float32), target_tensor)
-        shift_y = move_device_like(torch.arange(offset*stride, grid_h, 
-                                                #same as shift_x
+        shift_y = move_device_like(torch.arange(offset*stride, grid_h*stride, 
                                                 step = stride, dtype = torch.float32), target_tensor)
         
         shift_x, shift_y = torch.meshgrid(shift_x, shift_y)
