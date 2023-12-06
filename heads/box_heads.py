@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch.nn import Conv2d, ReLU, Flatten, Linear
 import torch.nn as nn
 from layers import ShapeSpec, get_norm, cat, cross_entropy, batched_nms
-from utils.events import get_event_storage
+from utils.events import EventStorage
 from layers.wrappers import nonzero_tuple
 from RPN.box_regression import _dense_box_regression_loss
 from structures import Instances, Boxes
@@ -130,7 +130,7 @@ class Fast_RCNN_Output_Layers(nn.Module):
         _log_classification_stats(scores, gt_classes)
         
         if len(proposals):
-            proposal_boxes = cat([p.proposal_boxes for p in proposals], dim = 0)
+            proposal_boxes = cat([p.proposal_boxes.tensor for p in proposals], dim = 0)
             assert not proposal_boxes.requires_grad, "Proposal boxes should not require gradient"
             
             gt_boxes = cat(
@@ -149,7 +149,7 @@ class Fast_RCNN_Output_Layers(nn.Module):
                 proposal_boxes, gt_boxes, proposals_deltas, gt_classes
             ),
         }    
-        return {k: v * self.loss_weight.get(k, 1.0) for k, v in losses.items()}
+        return {k: v * self.loss_weights.get(k, 1.0) for k, v in losses.items()}
     
     def sigmoid_cross_entropy_loss(self,
                                    pred_logits,
@@ -213,12 +213,13 @@ class Fast_RCNN_Output_Layers(nn.Module):
             ]
         
         loss_box_reg = _dense_box_regression_loss(
-            [proposal_boxes[fg_inds]],
-            self.box2box_transform,
-            [fg_pred_deltas.unsqueeze(0)],
-            ...,
-            self.box_reg_loss_type,
-            self.smooth_l1_beta
+            anchors=[proposal_boxes[fg_inds]],
+            box2box_transform=self.box2box_transform,
+            pred_anchor_deltas=[fg_pred_deltas.unsqueeze(0)],
+            gt_boxes=[gt_boxes[fg_inds]],
+            fg_mask=...,
+            box_reg_loss_type=self.box_reg_loss_type,
+            smooth_l1_beta=self.smooth_l1_beta
         )
         return loss_box_reg/max(gt_classes.numel(), 1.0)
     
@@ -270,7 +271,7 @@ class Fast_RCNN_Output_Layers(nn.Module):
             return []
         _, proposal_deltas = predictions
         num_prop_per_image = [len(p) for p in proposals]
-        proposal_boxes = cat([p.proposal_boxes for p in proposals], dim = 0)
+        proposal_boxes = cat([p.proposal_boxes.tensor for p in proposals], dim=0)
         predict_boxes = self.box2box_transform.apply_deltas(
             proposal_deltas,
             proposal_boxes
@@ -285,8 +286,9 @@ class Fast_RCNN_Output_Layers(nn.Module):
         if self.use_sigmoid_ce:
             probs = scores.sigmoid()
         else:
-            probs = F.softmax(scores, dim = 1)
-        return probs.split(num_inst_per_image)
+            probs = F.softmax(scores, dim=-1)
+        return probs.split(num_inst_per_image, dim=0)
+
         
 def fast_rcnn_inference(
     boxes: List[torch.tensor],
@@ -305,7 +307,7 @@ def fast_rcnn_inference(
             score_thresh,
             nms_thresh,
             topk_per_image
-        ) for boxes_per_image, scores_per_image, image_shape in zip(scores, boxes, image_shapes)
+        ) for scores_per_image, boxes_per_image, image_shape in zip(scores, boxes, image_shapes)
     ]        
     #Return topk confident prediction and corresponding boxes/scores index in [0, Ri] from the input, for image i
     #Ri is the number of predicted objects
@@ -324,7 +326,7 @@ def fast_rcnn_inference_single_image(
         boxes = boxes[valid_mask]
         scores = scores[valid_mask]
     
-    scores = scores[:,:,-1]
+    scores = scores[:,:-1]
     num_bboxes_reg_classes = boxes.shape[1]//4 #Boxes in shape (Ri, K*4) if class-specified prediction, else (Ri, 4) for class-agnostic one
     
     boxes = Boxes(boxes.reshape(-1, 4))
@@ -370,11 +372,11 @@ def _log_classification_stats(pred_logits,
     num_accurate = (pred_classes == gt_classes).nonzero().numel()
     fg_num_accurate = (fg_pred_classes == fg_gt_classes).nonzero().numel()
     
-    storage = get_event_storage()
-    storage.put_scalar(f"{prefix}/cls_accuracy", num_accurate / num_instances)
+    with EventStorage() as storage:
+        storage.put_scalar(f"{prefix}/cls_accuracy", num_accurate / num_instances)
     
-    if num_fg > 0:
-        storage.put_scalar(f"{prefix}/fg_cls_accuracy", fg_num_accurate / num_fg)
-        storage.put_scalar(f"{prefix}/false_negative", num_false_negative / num_fg)
+        if num_fg > 0:
+            storage.put_scalar(f"{prefix}/fg_cls_accuracy", fg_num_accurate / num_fg)
+            storage.put_scalar(f"{prefix}/false_negative", num_false_negative / num_fg)
 
     

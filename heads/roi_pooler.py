@@ -14,7 +14,8 @@ def assign_boxes_to_levels(
     canonical_level:int = 4,
 ):
     box_sizes = torch.sqrt(cat([boxes.area() for boxes in box_lists]))
-    level_assignments = torch.floor(canonical_level + math.log2(box_sizes/canonical_box_size))
+    level_assignments = torch.floor(canonical_level + torch.log2(box_sizes/canonical_box_size + 1e-8))
+    #In the original scripts, they use `math.log2`. But it results in a ValueError: "Only one element tensors can be converted to Python scalars" so I changed to `torch.log2` for tensor inputs.
     level_assignments = torch.clamp(level_assignments, min=min_level, max=max_level) #All the element < min_level will be set to min_level
                                                                                      #Same as all the element > max_level
     return level_assignments.to(torch.int64) - min_level
@@ -123,7 +124,7 @@ class ROI_Pooler(nn.Module):
         )
         num_channels = x[0].shape[1]
         output_size = self.output_size[0]
-        output = create_zero(pooler_fmt_boxes, num_channels, output_size, output_size) #Output is a tensor of shape NxCxHxW 
+        output = create_zero(pooler_fmt_boxes, num_channels, output_size, output_size, x[0]) #Output is a tensor of shape NxCxHxW 
         
         for level, pooler in enumerate(self.level_poolers):
             inds = nonzero_tuple(level_assignments == level)[0]

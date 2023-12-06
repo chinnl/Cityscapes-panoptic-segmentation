@@ -6,7 +6,7 @@ import numpy as np
 from typing import Tuple, List, Dict, Optional
 from structures import Instances, Boxes, pairwise_iou, ImageList
 from .head_utils import add_ground_truth_to_proposals, subsample_labels, select_foreground_proposals
-from utils.events import get_event_storage
+from utils.events import EventStorage
 
 class ROI_Head(nn.Module):
     '''
@@ -89,13 +89,14 @@ class ROI_Head(nn.Module):
                 for (trg_name, trg_value) in targets_per_image.get_fields().items():
                     if trg_name.startswith('gt_') and not proposals_per_image.has(trg_name):
                         proposals_per_image.set(trg_name, trg_value[sampled_targets])
+            
             num_bg_samples.append((gt_classes == self.num_classes).sum().item())
             num_fg_samples.append(gt_classes.numel() - num_bg_samples[-1])
             proposals_with_gt.append(proposals_per_image)
         
-        storage = get_event_storage()
-        storage.put_scalar("roi_head/num_fg_samples", np.mean(num_fg_samples))
-        storage.put_scalar("roi_head/num_bg_samples", np.mean(num_bg_samples))
+        with EventStorage() as storage:
+            storage.put_scalar("roi_head/num_fg_samples", np.mean(num_fg_samples))
+            storage.put_scalar("roi_head/num_bg_samples", np.mean(num_bg_samples))
         
         return proposals_with_gt
     
@@ -151,6 +152,8 @@ class Standard_ROI_Heads(ROI_Head):
     ) -> Tuple[List[Instances], Dict[str, torch.tensor]]:
         
         del images
+        self.mask_head.training = self.box_head.training = self.box_predictor.training = self.training
+        
         if self.training:
             assert targets, 'No targets found'
             proposals = self.label_and_sample_proposals(proposals, targets)
@@ -206,6 +209,9 @@ class Standard_ROI_Heads(ROI_Head):
         instances: List[Instances],
     ):
         if not self.mask_on:
+            return {} if self.training else instances
+            
+        if self.training:    
             instances, _ = select_foreground_proposals(instances, self.num_classes)
         
         if self.mask_pooler is not None:

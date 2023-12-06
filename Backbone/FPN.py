@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
-
+from typing import Dict
 
 C = 256
 class FPN(nn.Module):
-    def __init__(self, input):
+    def __init__(self, 
+                 dummy_input:Dict #Dummy input for initialization
+                 ):
         super(FPN, self).__init__()
-        self.input = input
-        self.in_channels = [feature.shape[1] for _, feature in self.input.items()]
+
+        self.in_channels = [feature.shape[1] for _, feature in dummy_input.items()]
         self.lat_conv2 = nn.Sequential(
                                 nn.Conv2d(self.in_channels[-1], C, kernel_size = 1, stride = 1, bias = False), 
                                 nn.BatchNorm2d(C)
@@ -28,9 +30,9 @@ class FPN(nn.Module):
                                 nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = False, padding = 1),
                                 nn.BatchNorm2d(C),
                                 )
-    def forward(self):
+    def forward(self, input: Dict):
         top_downs = []
-        for P_i, lat_conv in zip(self.input.values(), [self.lat_conv5, self.lat_conv4, self.lat_conv3, self.lat_conv2]):
+        for P_i, lat_conv in zip(input.values(), [self.lat_conv5, self.lat_conv4, self.lat_conv3, self.lat_conv2]):
             lat_connect = lat_conv(P_i)
             if len(top_downs)>0:
                 _, _, H_out, W_out = lat_connect.shape

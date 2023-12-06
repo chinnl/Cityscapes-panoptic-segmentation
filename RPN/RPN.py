@@ -88,7 +88,7 @@ class RPN(nn.Module):
                  box_reg_loss_type: str = 'smooth_l1', #"smooth_l1" or "giou"
                  smooth_l1_beta: float=0.0, #beta parameter for the smooth L1 regression loss. 
                                             #Only used when `box_reg_loss_type` is "smooth_l1"
-                 is_training: bool = True):
+                ):
         super().__init__()
         self.rpn_head = head
         self.anchor_generator = anchor_generator
@@ -103,10 +103,12 @@ class RPN(nn.Module):
         self.box_reg_loss_type = box_reg_loss_type
         self.smooth_l1_beta = smooth_l1_beta
         self.box2box_transform = box2box_transform
-        self.training = is_training
         
-    def forward(self, images: ImageList, features: Dict[str, torch.tensor], gt_instances: Instances):
-        anchors = self.anchor_generator.forward(features, (4,8,16,32,64)) #List of L Boxes where
+    def forward(self, 
+                images: ImageList, 
+                features: Dict[str, torch.tensor], 
+                gt_instances: Instances):
+        anchors = self.anchor_generator.forward(features) #List of L Boxes where
                                                         #each Boxes element is a tensor in shape 
                                                         #(A*Hi*Wi,4)
         pred_objectness_logits, pred_anchor_deltas = self.rpn_head.forward(features)
@@ -154,19 +156,20 @@ class RPN(nn.Module):
                 i-th element is a Rx4 tensor. The values are the matched gt boxes for each
                 anchor. Values are undefined for those anchors not labeled as 1.
         """
-        gt_labels = []
-        matched_gt_boxes = []
-        
         anchors = Boxes.cat(anchors)
+        
         gt_boxes = [gt.gt_boxes for gt in gt_instances]
         
         # image_sizes = [gt.image_size for gt in gt_instances]
         del gt_instances
         
+        gt_labels = []
+        matched_gt_boxes = []
+        
         for gt_box in gt_boxes:
             iou_matrix = pairwise_iou(gt_box, anchors)
             matched_idxs, gt_label = self.anchor_matcher(iou_matrix)
-            # gt_label = gt_label.to(device=gt_box.device) #Uncomment when utilizing GPU
+            gt_label = gt_label.to(device=gt_box.device) #Uncomment when utilizing GPU
             del iou_matrix
             gt_label = self.subsample_labels(gt_label,
                                              self.batch_size_per_image,

@@ -19,7 +19,11 @@ def move_device_like(src: torch.Tensor, dst: torch.Tensor) -> torch.Tensor:
     return src.to(dst.device)
 
 class Anchor_Generator(nn.Module):
-    def __init__(self, anchor_sizes, aspect_ratios: List[float], strides: List[int], offset = 0.5):
+    def __init__(self, 
+                 anchor_sizes: List[float], 
+                 aspect_ratios: List[float], 
+                 strides: List[int], 
+                 offset = 0.5):
         super(Anchor_Generator, self).__init__()
         """
         Args:
@@ -32,7 +36,7 @@ class Anchor_Generator(nn.Module):
             !!!Modify: each element in sizes is anchor area to prevent rounding error
             aspect_ratios (list[list[float]] or list[float]): list of aspect ratios
                 (i.e. height / width) to use for anchors. Same "broadcast" rule for `sizes` applies.
-            strides (list[int]): stride of each input feature.
+            strides (list[int]): ratio between image size and feature maps sizes.
             offset (float): Relative offset between the center of the first anchor and the top-left
                 corner of the image. Value has to be in [0, 1).
                 Recommend to use 0.5, which means half stride.

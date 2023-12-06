@@ -5,7 +5,7 @@ import torch
 from layers.wrappers import move_device_like
 from layers import cat, ShapeSpec, get_norm
 from structures import Instances, Boxes
-from utils.events import get_event_storage
+from utils.events import EventStorage
 import torch.nn.functional as F
 
 def mask_rcnn_loss(
@@ -33,7 +33,7 @@ def mask_rcnn_loss(
         gt_masks_per_image = instances_per_image.gt_masks.crop_and_resize(
             instances_per_image.proposal_boxes.tensor, mask_side_len
         ).to(device= pred_mask_logits.device)
-        gt_masks.append(gt_classes_per_image)
+        gt_masks.append(gt_masks_per_image)
         
     if len(gt_masks) == 0:
         return pred_mask_logits.sum()*0
@@ -62,10 +62,10 @@ def mask_rcnn_loss(
     )
     false_negative = (mask_incorrect & gt_masks_bool).sum().item() / max(num_positive, 1.0)
     
-    storage = get_event_storage()
-    storage.put_scalar("mask_rcnn/accuracy", mask_accuracy)
-    storage.put_scalar("mask_rcnn/false_positive", false_positive)
-    storage.put_scalar("mask_rcnn/false_negative", false_negative)
+    with EventStorage() as storage:
+        storage.put_scalar("mask_rcnn/accuracy", mask_accuracy)
+        storage.put_scalar("mask_rcnn/false_positive", false_positive)
+        storage.put_scalar("mask_rcnn/false_negative", false_negative)
     
     if vis_period > 0 and storage.iter % vis_period == 0:
         pred_masks = pred_mask_logits.sigmoid()
@@ -89,10 +89,7 @@ def mask_rcnn_inference(
     else: 
         num_masks = pred_masks_logits.shape[0]
         class_pred = cat([i.pred_classes for i in pred_instances])
-        device = (
-            class_pred.device if torch.jit.is_scripting()
-            else ("cpu" if torch.jit.is_tracing() else class_pred.device)
-        )
+        device = class_pred.device
         indices = move_device_like(torch.arange(num_masks, device = device), class_pred)
         mask_probs_pred = pred_masks_logits[indices, class_pred][:, None].sigmoid()
     
@@ -115,7 +112,7 @@ class Base_Mask_RCNN_Head(nn.Module):
     ):
         x = self.layers(x)
         if self.training:
-            return {"loss_mask": mask_rcnn_loss(x, instances, self.vis_period) * self.loss_weight}
+            return {"loss_mask": mask_rcnn_loss(x, instances, self.vis_period) * self.loss_weights}
         else:
             mask_rcnn_inference(x, instances)
             return instances
@@ -138,17 +135,29 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
         self.conv_norm_relus = []
         cur_channels = input_shape.channels
         for k, conv_dim in enumerate(conv_dims[:-1]):
-            conv = nn.Sequential(
-                Conv2d(cur_channels,
-                        conv_dim,
-                        kernel_size=3,
-                        stride=1,
-                        padding=1,
-                        bias=not conv_norm,
-                        ),
-                get_norm(conv_norm, conv_dims),
-                ReLU(),
-                )
+            if conv_norm != '':
+                conv = nn.Sequential(
+                    Conv2d(cur_channels,
+                            conv_dim,
+                            kernel_size=3,
+                            stride=1,
+                            padding=1,
+                            bias=not conv_norm,
+                            ),
+                    get_norm(conv_norm, conv_dims),
+                    ReLU(),
+                    )
+            else:
+                conv = nn.Sequential(
+                    Conv2d(cur_channels,
+                            conv_dim,
+                            kernel_size=3,
+                            stride=1,
+                            padding=1,
+                            bias=not conv_norm,
+                            ),
+                    ReLU(),
+                    )
             self.add_module("mask_fcn{}".format(k + 1), conv)
             self.conv_norm_relus.append(conv)
             cur_channels = conv_dim

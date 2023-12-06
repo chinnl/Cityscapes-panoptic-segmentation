@@ -17,11 +17,11 @@ class R50(nn.Module):
         self.layer3 = self.make_layers(BottleneckBlock, self.layers[2], out_channels=256, stride = 2)
         self.layer4 = self.make_layers(BottleneckBlock, self.layers[3], out_channels=512, stride = 2)
         
-    def forward(self, input: torch.Tensor):
+    def forward(self, x: torch.tensor):
         '''
         Input size: B x 3 x H x W
         '''
-        x = self.stem(input)
+        x = self.stem(x)
         res2 = self.layer1(x)
         res3 = self.layer2(res2)
         res4 = self.layer3(res3)
