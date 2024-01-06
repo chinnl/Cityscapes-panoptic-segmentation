@@ -1,0 +1,76 @@
+general:
+  num_classes: 35
+  input_shape: [1024,768]
+  padding_constraint:
+    square_size: 768
+    size_divisibility: 0
+
+anchor_generator:
+  anchor_sizes: [32,64,128,256,512]
+  anchor_ratios: [0.5, 1.0, 2.0]
+  anchor_strides: [4,8,16,32,64]
+
+rpn:
+  batch_size_per_img: 256
+  positive_fraction: 0.5
+  pre_nms_topk: [8000, 1000]
+  post_nms_topk: [1000, 500]
+  nms_thresh: 0.5
+  loss_weights: {'loss_rpn_cls': 0.3, 'loss_rpn_loc': 0.5}
+  min_box_size: 0.0
+  box_reg_loss_type: smooth_l1
+  box_transform_weights: [1.0, 1.0, 1.0, 1.0]
+  matcher:
+    thresholds: [0.3, 0.7]
+    labels: [0,-1,1]
+    allow_low_quality_matches: false
+
+box_pooler:
+  output_shape: 7
+  scales: [0.25, 0.125, 0.0625, 0.03125]
+  sampling_ratio: 0
+  pooler_type: ROIAlignV2
+
+
+box_head:
+  input_shape: [256,7,7] #Channel, height, width, stride
+  conv_dims: []
+  fc_dims: [1024,1024]
+  conv_norm: ''
+
+box_predictor:
+  input_shape: 1024
+  test_score_thresh: 0.5
+  box_transform_weights: [10,10,5,5]
+  cls_agnostic_bbox_reg: false
+  box_reg_loss_type: smooth_l1
+  smooth_l1_beta: 0
+  loss_weight: {"loss_cls": 1.0, "loss_box_reg": 1.0}
+
+mask_pooler:
+  output_size: 14
+  scales: [0.25, 0.125, 0.0625, 0.03125]
+  sampling_ratio: 0
+  pooler_type: ROIAlignV2
+
+mask_head:
+  input_shape: [256,14,14]
+  conv_dims: [256,256,256,256,256]
+  conv_norm: ''
+
+roi_heads:
+  batch_size_per_img: 256
+  positive_fraction: 0.25
+  matcher:
+    thresholds: [0.5]
+    labels: [0,1]
+    allow_low_quality_matches: false
+  box_in_features: [P2, P3, P4, P5]
+  mask_in_features: [P2, P3, P4, P5]
+  train_on_pred_boxes: false
+
+panoptic_head:
+  combine_overlap_thresh: 0.8
+  combine_stuff_area_thresh: 4096
+  combine_instances_score_thresh: 0.3
+  

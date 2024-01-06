@@ -33,7 +33,6 @@ class Anchor_Generator(nn.Module):
                 If ``sizes`` is list[float], ``sizes`` is used for all feature maps.
                 Anchor sizes are given in absolute lengths in units of
                 the input image; they do not dynamically scale if the input image size changes.
-            !!!Modify: each element in sizes is anchor area to prevent rounding error
             aspect_ratios (list[list[float]] or list[float]): list of aspect ratios
                 (i.e. height / width) to use for anchors. Same "broadcast" rule for `sizes` applies.
             strides (list[int]): ratio between image size and feature maps sizes.
@@ -59,9 +58,9 @@ class Anchor_Generator(nn.Module):
         if not isinstance(aspect_ratios, (list, tuple)):
             aspect_ratios = [aspect_ratios]
             
-        for area in sizes:
+        for size in sizes:
             for ratio in aspect_ratios:
-                a_w = math.sqrt(area/ratio)
+                a_w = math.sqrt(size**2/ratio)
                 a_h = a_w*ratio
                 anchors.append([-a_w/2.0, -a_h/2.0, a_w/2.0, a_h/2.0])
         return torch.tensor(anchors)

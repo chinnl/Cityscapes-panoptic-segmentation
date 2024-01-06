@@ -13,7 +13,7 @@ from structures import Instances, Boxes
 
 class Fast_RCNN_Conv_FC_Head(nn.Sequential):
     def __init__(self,
-                 input_shape: ShapeSpec,
+                 input_shape: Union[ShapeSpec, Tuple, int],
                  *,
                  conv_dims: List[int],
                  fc_dims: List[int],
@@ -21,6 +21,11 @@ class Fast_RCNN_Conv_FC_Head(nn.Sequential):
         super().__init__()
         assert len(conv_dims) + len(fc_dims) > 0
         
+        if isinstance(input_shape, list or tuple):
+            input_shape = ShapeSpec(*input_shape)
+        elif isinstance(input_shape, int):
+            input_shape = ShapeSpec(channels=input_shape)
+            
         self._output_size = (input_shape.channels, input_shape.height, input_shape.width)
         self.conv_norm_relus = []
         
@@ -33,7 +38,13 @@ class Fast_RCNN_Conv_FC_Head(nn.Sequential):
                        bias=not conv_norm),
                 get_norm(conv_norm, conv_dim),
                 ReLU(),
-            )
+                ) if conv_norm != "" else nn.Sequential(
+                    Conv2d(self._output_size[0],
+                        conv_dim,
+                        kernel_size=3,
+                        padding=1,
+                        bias=not conv_norm),
+                    ReLU(),)
             self.add_module("conv{}".format(k + 1), conv)
             self.conv_norm_relus.append(conv)
             self._output_size = (conv_dim, self._output_size[1], self._output_size[2])
@@ -55,7 +66,7 @@ class Fast_RCNN_Conv_FC_Head(nn.Sequential):
 
 class Fast_RCNN_Output_Layers(nn.Module):
     def __init__(self,
-                 input_shape: ShapeSpec,
+                 input_shape: Union[ShapeSpec, Tuple, int],
                  *,
                  box2box_transform,
                  num_classes: int,
@@ -72,11 +83,14 @@ class Fast_RCNN_Output_Layers(nn.Module):
                  use_sigmoid_ce: bool = False,
                  get_fed_loss_cls_weights: Optional[Callable] = None,
                  fed_loss_num_classes: int = 50,
+                 **kwargs
                  ):
         super().__init__()
         if isinstance(input_shape, int):
             input_shape = ShapeSpec(channels=input_shape)
-        
+        elif isinstance(input_shape, list or tuple):
+            input_shape = ShapeSpec(*input_shape)
+        self.ignore_value = kwargs['ignore_value']
         self.num_classes = num_classes
         input_size = input_shape.channels*(input_shape.width or 1)*(input_shape.height or 1)
         self.cls_score = Linear(input_size, num_classes + 1)
@@ -142,7 +156,8 @@ class Fast_RCNN_Output_Layers(nn.Module):
         if self.use_sigmoid_ce:
             loss_cls = self.sigmoid_cross_entropy_loss(scores, gt_classes)
         else:
-            loss_cls = cross_entropy(scores, gt_classes, reduction = "mean")    
+            # loss_cls = cross_entropy(scores, gt_classes, reduction = "mean")    
+            loss_cls = F.cross_entropy(scores, gt_classes, ignore_index=self.ignore_value, reduction='mean')
         losses = {
             "loss_cls": loss_cls,
             "loss_box_reg": self.box_reg_loss(
@@ -204,7 +219,7 @@ class Fast_RCNN_Output_Layers(nn.Module):
                      pred_deltas,
                      gt_classes,):
         box_dim = proposal_boxes.shape[1]
-        fg_inds = nonzero_tuple((gt_classes>=0)&(gt_classes<self.num_classes))
+        fg_inds = nonzero_tuple((gt_classes>=0)&(gt_classes<self.num_classes))[0]
         if pred_deltas.shape[1] == box_dim:
             fg_pred_deltas = pred_deltas[fg_inds]
         else:

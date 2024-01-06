@@ -1,6 +1,6 @@
 from torch.nn import Conv2d, ConvTranspose2d, ReLU
 import torch.nn as nn
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Tuple
 import torch
 from layers.wrappers import move_device_like
 from layers import cat, ShapeSpec, get_norm
@@ -122,7 +122,7 @@ class Base_Mask_RCNN_Head(nn.Module):
 
 class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
     def __init__(self, 
-                 input_shape: ShapeSpec,
+                 input_shape: Union[ShapeSpec, Tuple, int],
                  *,
                  num_classes: int,
                  conv_dims: List[int],
@@ -131,6 +131,11 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
                  ):
         super().__init__(**kwargs)
         assert len(conv_dims) >= 1, "conv_dims input have to be non-empty"
+        
+        if isinstance(input_shape, int):
+            input_shape = ShapeSpec(channels=input_shape)
+        elif isinstance(input_shape, list or tuple):
+            input_shape = ShapeSpec(*input_shape)
         
         self.conv_norm_relus = []
         cur_channels = input_shape.channels
