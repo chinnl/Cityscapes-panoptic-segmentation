@@ -1,5 +1,3 @@
-import sys
-sys.path.append(r"E:\20231\DATN\Cityscapes-panoptic-segmentation")
 import numpy as np
 import torch
 from typing import List, Union, Optional

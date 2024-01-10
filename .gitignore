@@ -18,3 +18,5 @@ _ext
 .vscode
 _darcs
 
+test.py
+test.ipynb
