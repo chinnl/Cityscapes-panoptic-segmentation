@@ -10,63 +10,6 @@ from Data.augmentation_impl import RandomFlip, ResizeShortestEdge
 from Data.distributed_sampler import TrainingSampler, InferenceSampler
 from Data.common import ToIterableDataset, MapDataset
 
-DEFAULT_TRAIN_MAPPER = Dataset_mapper(is_train=True,
-                                        use_instance_mask = True,
-                                        augmentations=[],
-                                        image_format='BGR',
-                                        instance_mask_format='bitmask',
-                                        precomputed_proposal_topk=None,
-                                        recompute_boxes=True)
-
-
-# class Cityscapes(Dataset):
-#     def __init__(self, 
-#                  data_folder: str, #"D:\Data\Cityscapes\leftImg8bit\train"
-#                  data_mapper: Callable):
-#         super().__init__()
-#         self.data_folder = data_folder
-#         self.data_mapper = data_mapper
-#         self.image_list = glob.glob(data_folder + "\\*\\*")
-#         self.gt_dir = data_folder.replace("\\leftImg8bit\\", "\\gtFine\\")
-            
-#     def __len__(self):
-#         return len(self.image_list)
-    
-#     def __getitem__(self, idx):
-#         file_name = self.image_list[idx].split("\\")[-1].replace("_leftImg8bit.png", "")
-#         city_name = file_name.split("_")[0]
-#         annotation = read_json_file(os.path.join(self.gt_dir, city_name + "\\" + file_name + "_gtFine_polygons.json"))
-        
-#         data_dict = {
-#             'file_name': self.image_list[idx],
-#             'sem_seg_file_name': os.path.join(self.gt_dir, city_name + "\\" + file_name + "_gtFine_labelIds.png"),
-#             'annotations': [],
-#             }
-        
-#         for obj_dict in annotation['objects']:
-#             iscrowd = int(obj_dict['label'].endswith('group'))
-            
-#             polygon = np.array(obj_dict['polygon'])
-#             bbox = obj_dict['polygon'][np.argmin(np.sum(polygon, axis = 1))] + obj_dict['polygon'][np.argmax(np.sum(polygon, axis = 1))]
-            
-#             try:
-#                 category_id = name2label[obj_dict['label']].categoryId
-#             except:
-#                 category_id = name2label[obj_dict['label'].replace("group", "")].categoryId
-                
-#             data_dict['annotations'].append(
-#                 {
-#                     'segmentation': [polygon],
-#                     'bbox': bbox,
-#                     'bbox_mode': BoxMode.XYXY_ABS,
-#                     'iscrowd': iscrowd,
-#                     'category_id': category_id,
-#                 }
-#             )
-
-        
-#         return self.data_mapper(data_dict)
-
 
 class Cityscapes(Dataset):
     def __init__(self, 
