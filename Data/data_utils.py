@@ -1,12 +1,10 @@
 import json
 import numpy as np
 import torch
-from structures import Boxes, Instances, BoxMode
-from structures.masks import *
+from structures import Boxes, Instances, BoxMode, BitMasks, PolygonMasks, polygons_to_bitmask
 from .transform import TransformList
 from .augmentation_impl import RandomFlip, ResizeShortestEdge
 import pycocotools.mask as mask_util
-import cv2
 
 from iopath.common.file_io import PathManager as PathManagerBase
 PathManager = PathManagerBase()

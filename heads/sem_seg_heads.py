@@ -2,7 +2,7 @@ from torch import nn
 import torch.nn.functional as F
 import numpy as np
 from layers import ShapeSpec, get_norm
-from utils import sem_seg_postprocess
+from utils.postprocess import sem_seg_postprocess
 from typing import Dict, List, Tuple, Optional, Union, Callable
 import fvcore.nn.weight_init as weight_init
 

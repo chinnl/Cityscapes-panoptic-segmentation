@@ -1,7 +1,5 @@
 import torch
 from torch.nn import functional as F
-
-
 from structures import Instances, ROIMasks
 
 

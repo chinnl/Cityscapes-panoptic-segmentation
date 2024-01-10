@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from typing import List, Dict
 from structures import ImageList
-from utils import sem_seg_postprocess, detector_postprocess
+from utils.postprocess import sem_seg_postprocess, detector_postprocess
 from .rcnn import GeneralizedRCNN
 
 class PanopticFPN(GeneralizedRCNN):
