@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from typing import List, Dict, Optional, Tuple
 
-from utils import detector_postprocess
+from utils.postprocess import detector_postprocess
 from layers import move_device_like
 from structures import ImageList
 
