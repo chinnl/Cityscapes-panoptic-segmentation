@@ -2,7 +2,7 @@ import torch
 from torch.nn import functional as F
 
 
-from detectron2.structures import Instances, ROIMasks
+from structures import Instances, ROIMasks
 
 
 def sem_seg_postprocess(result, img_size, output_height, output_width):
