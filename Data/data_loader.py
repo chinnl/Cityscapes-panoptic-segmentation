@@ -6,9 +6,9 @@ from .labels import name2label
 from structures import BoxMode
 import os
 import glob
-from Data.augmentation_impl import RandomFlip, ResizeShortestEdge
-from Data.distributed_sampler import TrainingSampler, InferenceSampler
-from Data.common import ToIterableDataset, MapDataset
+from .augmentation_impl import RandomFlip, ResizeShortestEdge
+from .distributed_sampler import TrainingSampler, InferenceSampler
+from .common import ToIterableDataset, MapDataset
 
 
 class Cityscapes(Dataset):
@@ -107,7 +107,6 @@ def build_dataloader(cfg):
     trainloader = DataLoader(cityscapes_train,
                             batch_size=cfg.train.batch_size,
                             drop_last=False,
-                            shuffle=True,
                             num_workers=0,
                             collate_fn=trivial_batch_collator,
                             prefetch_factor = None,
@@ -117,7 +116,6 @@ def build_dataloader(cfg):
     valloader = DataLoader(cityscapes_val,
                             batch_size=cfg.val.batch_size,
                             drop_last=False,
-                            shuffle=False,
                             num_workers=0,
                             collate_fn=trivial_batch_collator,
                             prefetch_factor = None,

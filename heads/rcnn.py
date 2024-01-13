@@ -41,7 +41,8 @@ class GeneralizedRCNN(nn.Module):
     
     @property
     def device(self):
-        return self.pixel_mean.device
+        # return self.pixel_mean.device
+        return next(self.parameters()).device
     
     def _move_to_current_device(self, x):
         return move_device_like(x, self.pixel_mean)
