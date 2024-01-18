@@ -32,8 +32,8 @@ class GeneralizedRCNN(nn.Module):
         self.proposal_generator = proposal_generator
         self.roi_heads = roi_heads
         self.input_format = input_format
-        self.pixel_mean = torch.tensor(pixel_mean).view(-1, 1, 1)
-        self.pixel_std = torch.tensor(pixel_std).view(-1, 1, 1)
+        self.pixel_mean = torch.nn.Parameter(torch.tensor(pixel_mean).view(-1, 1, 1), requires_grad=False)
+        self.pixel_std = torch.nn.Parameter(torch.tensor(pixel_std).view(-1, 1, 1), requires_grad=False)
         
         assert (
             self.pixel_mean.shape == self.pixel_std.shape
@@ -41,8 +41,7 @@ class GeneralizedRCNN(nn.Module):
     
     @property
     def device(self):
-        # return self.pixel_mean.device
-        return next(self.parameters()).device
+        return self.pixel_mean.device
     
     def _move_to_current_device(self, x):
         return move_device_like(x, self.pixel_mean)

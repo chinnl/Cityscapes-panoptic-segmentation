@@ -17,8 +17,8 @@ class Panoptic_FPN_R50_Mask_RCNN(nn.Module):
         } 
         
         bottom_up = R50()
-        self.dummy_data = torch.zeros((1,3,cfg.general.input_shape[0], cfg.general.input_shape[1]), dtype = torch.float32)
-        fpn = FPN(bottom_up(self.dummy_data))
+        dummy_data = torch.zeros((1,3,cfg.general.input_shape[0], cfg.general.input_shape[1]), dtype = torch.float32)
+        fpn = FPN(bottom_up(dummy_data))
         self.backbone = nn.Sequential(bottom_up, fpn)
 
         rpn_head = RPN_Head(4, len(cfg.anchor_generator.anchor_ratios))
@@ -96,9 +96,9 @@ class Panoptic_FPN_R50_Mask_RCNN(nn.Module):
                                             norm="GN", 
                                             ignore_value = 255)
         
-        self.pixel_mean = [103.530, 116.280, 123.675] #ImageNet BGR mean
-        self.pixel_std = [1.0, 1.0, 1.0] #ImageNet BGR std
-        self.input_format="BGR"
+        pixel_mean = [103.530, 116.280, 123.675] #ImageNet BGR mean
+        pixel_std = [1.0, 1.0, 1.0] #ImageNet BGR std
+        input_format="BGR"
         
         self.Panoptic = PanopticFPN(cfg = self.cfg,
                                     backbone = self.backbone,
@@ -108,9 +108,10 @@ class Panoptic_FPN_R50_Mask_RCNN(nn.Module):
                                     combine_overlap_thresh = cfg.panoptic_head.combine_overlap_thresh,
                                     combine_stuff_area_thresh = cfg.panoptic_head.combine_stuff_area_thresh,
                                     combine_instances_score_thresh = cfg.panoptic_head.combine_instances_score_thresh,
-                                    pixel_mean = self.pixel_mean,
-                                    pixel_std = self.pixel_std,
-                                    input_format = self.input_format)
+                                    pixel_mean = pixel_mean,
+                                    pixel_std = pixel_std,
+                                    input_format = input_format)
+        
         print('Model is initialized with: ', self.num_params())
         print('Current device: ', self.device)
         print("-"*60)
@@ -128,7 +129,7 @@ class Panoptic_FPN_R50_Mask_RCNN(nn.Module):
 
     @property
     def device(self):
-        return self.dummy_data.device
+        return next(self.parameters()).device
 
 
 
