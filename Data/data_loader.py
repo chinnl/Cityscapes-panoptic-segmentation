@@ -74,7 +74,7 @@ def build_dataloader(cfg):
     train_folder = cfg.train.folder
     val_folder = cfg.val.folder
     
-    train_mapper = Dataset_mapper(is_train=True,
+    data_mapper = Dataset_mapper(is_train=True,
                             use_instance_mask = True,
                             augmentations=[RandomFlip(), 
                                            ResizeShortestEdge([512], sample_style='choice')],
@@ -83,20 +83,11 @@ def build_dataloader(cfg):
                             precomputed_proposal_topk=None,
                             recompute_boxes=True)
     
-    val_mapper = Dataset_mapper(is_train=False,
-                            use_instance_mask = True,
-                            augmentations=[RandomFlip(), 
-                                           ResizeShortestEdge([512], sample_style='choice')],
-                            image_format='BGR',
-                            instance_mask_format='bitmask',
-                            precomputed_proposal_topk=None,
-                            recompute_boxes=True)
-    
-    cityscapes_train = MapDataset(Cityscapes(train_folder), train_mapper)
-    cityscapes_val = MapDataset(Cityscapes(val_folder), val_mapper)
+    cityscapes_train = MapDataset(Cityscapes(train_folder), data_mapper)
+    cityscapes_val = MapDataset(Cityscapes(val_folder), data_mapper)
 
     train_sampler = TrainingSampler(len(cityscapes_train))
-    val_sampler = InferenceSampler(len(cityscapes_val))
+    val_sampler = TrainingSampler(len(cityscapes_val))
     
     cityscapes_train = ToIterableDataset(cityscapes_train, 
                                          train_sampler, 
@@ -104,19 +95,21 @@ def build_dataloader(cfg):
     cityscapes_val = ToIterableDataset(cityscapes_val, 
                                          val_sampler, 
                                          shard_chunk_size=cfg.val.batch_size)
+    
     trainloader = DataLoader(cityscapes_train,
                             batch_size=cfg.train.batch_size,
                             drop_last=False,
-                            num_workers=0,
+                            num_workers=4,
                             collate_fn=trivial_batch_collator,
                             prefetch_factor = None,
                             persistent_workers = False,
                             pin_memory = False
                             )
+    
     valloader = DataLoader(cityscapes_val,
                             batch_size=cfg.val.batch_size,
                             drop_last=False,
-                            num_workers=0,
+                            num_workers=4,
                             collate_fn=trivial_batch_collator,
                             prefetch_factor = None,
                             persistent_workers = False,

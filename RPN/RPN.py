@@ -5,12 +5,9 @@ from .box_regression import Box2BoxTransform, _dense_box_regression_loss
 from .matcher import Matcher
 from typing import List, Tuple, Dict
 
-# import sys
-# sys.path.append(r"E:\20231\DATN\detectron2_rebuild")
 from Backbone import FPN, R50
-from layers import Conv2d, ShapeSpec, cat
+from layers import cat
 from structures import ImageList, Instances, pairwise_iou
-from utils.events import EventStorage
 
 C = 256
 
@@ -111,6 +108,7 @@ class RPN(nn.Module):
         anchors = self.anchor_generator.forward(features) #List of L Boxes where
                                                         #each Boxes element is a tensor in shape 
                                                         #(A*Hi*Wi,4)
+        anchors = [anchor_boxes.to(self.device) for anchor_boxes in anchors]
         pred_objectness_logits, pred_anchor_deltas = self.rpn_head.forward(features)
         # Transpose the Hi*Wi*A dimension to the middle:
         pred_objectness_logits = [
@@ -157,7 +155,6 @@ class RPN(nn.Module):
                 anchor. Values are undefined for those anchors not labeled as 1.
         """
         anchors = Boxes.cat(anchors)
-        
         gt_boxes = [gt.gt_boxes for gt in gt_instances]
         
         # image_sizes = [gt.image_size for gt in gt_instances]
@@ -231,13 +228,8 @@ class RPN(nn.Module):
         fg_mask = gt_labels == 1
         
         num_images = len(gt_labels)
-        num_fg_anchors = fg_mask.sum().item()
-        num_bg_anchors = (gt_labels == 0).sum().item()
-        
-        with EventStorage() as storage:
-        # storage = get_event_storage()
-            storage.put_scalar("rpn/num_fg_anchors", num_fg_anchors/num_images)
-            storage.put_scalar("rpn/num_bg_anchors", num_bg_anchors/num_images)
+        # num_fg_anchors = fg_mask.sum().item()
+        # num_bg_anchors = (gt_labels == 0).sum().item()
         
         localization_loss = _dense_box_regression_loss( #Only calculate loss on foreground boxes
             anchors,
@@ -293,6 +285,10 @@ class RPN(nn.Module):
             self.min_box_size,
             self.training,
         )
+        
+    @property
+    def device(self):
+        return next(self.parameters()).device
             
 if __name__ == "__main__":
     backbone = R50()

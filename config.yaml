@@ -1,7 +1,7 @@
 data:
   train:
     folder: D:\Data\Cityscapes\leftImg8bit\train
-    batch_size: 8
+    batch_size: 4
   
   val:
     folder: D:\Data\Cityscapes\leftImg8bit\val
@@ -13,32 +13,32 @@ model:
     num_classes: 35
     input_shape: [512,1024]
     padding_constraint:
-      square_size: 1024
+      square_size: 0
       size_divisibility: 0
 
   anchor_generator:
-    anchor_sizes: [32,64,128,256,512]
-    anchor_ratios: [0.5, 1.0, 2.0]
-    anchor_strides: [4,8,16,32,64]
+    anchor_sizes: [32,64,128,256,512] # One anchor size for each feature map level
+    anchor_ratios: [0.5, 1.0, 2.0] # All 3 anchor ratios for each feature map level
+    anchor_strides: [4,8,16,32,64] # One anchor stride for each feature map level
 
   rpn:
-    batch_size_per_img: 256
-    positive_fraction: 0.5
-    pre_nms_topk: [8000, 1000]
-    post_nms_topk: [1000, 500]
-    nms_thresh: 0.5
+    batch_size_per_img: 256 # Total number of anchor boxes will be sampled
+    positive_fraction: 0.5 # Number of positive boxes / number of negative boxes
+    pre_nms_topk: [8000, 1000] # Number of boxes for selecting before NMS [for train = 8000, for test = 1000]
+    post_nms_topk: [1000, 500] # Number of boxes for selecting after NMS [for train = 1000, for test = 500]
+    nms_thresh: 0.5 
     loss_weights: {'loss_rpn_cls': 0.3, 'loss_rpn_loc': 0.5}
-    min_box_size: 0.0
+    min_box_size: 0.0 
     box_reg_loss_type: smooth_l1
     box_transform_weights: [1.0, 1.0, 1.0, 1.0]
     matcher:
-      thresholds: [0.3, 0.7]
-      labels: [0,-1,1]
+      thresholds: [0.3, 0.7] # IoU(anchor box, gt box) < 0.3: label 0: background; IoU(anchor box, gt box) > 0.7: label 1: foreground; else: -1: ignored
+      labels: [0, -1, 1]
       allow_low_quality_matches: false
 
   box_pooler:
     output_shape: 7
-    scales: [0.25, 0.125, 0.0625, 0.03125]
+    scales: [0.25, 0.125, 0.0625, 0.03125] # Scale for each level: 1/4, 1/8, 1/16, 1/32
     sampling_ratio: 0
     pooler_type: ROIAlignV2
 
@@ -60,13 +60,13 @@ model:
 
   mask_pooler:
     output_size: 14
-    scales: [0.25, 0.125, 0.0625, 0.03125]
+    scales: [0.25, 0.125, 0.0625, 0.03125] # Scale for each level: 1/4, 1/8, 1/16, 1/32
     sampling_ratio: 0
     pooler_type: ROIAlignV2
 
   mask_head:
     input_shape: [256,14,14]
-    conv_dims: [256,256,256,256,256]
+    conv_dims: [256, 256, 256, 256, 256]
     conv_norm: ''
 
   roi_heads:
@@ -85,3 +85,13 @@ model:
     combine_stuff_area_thresh: 4096
     combine_instances_score_thresh: 0.3
     
+config:
+  max_iters: 10000
+  optimizer: 
+    name: Adam
+    base_lr: 1e-3
+  scheduler: 
+    name: StepLR
+    lr_factor: 0.1
+    step: 1000
+  save_dir: './saver'
