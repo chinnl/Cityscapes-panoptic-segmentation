@@ -33,8 +33,10 @@ val_losses = {'loss_sem_seg': [],
                 'loss_cls': [],
                 'loss_box_reg': [],
                 'loss_mask': []}
+best_val_loss = 100
+
 with open(os.path.join(save_dir, 'log.txt'), "w") as log:
-    for epoch in range(max_iters):
+    for epoch in range(1, max_iters+1):
         model.train()
         epoch_train_losses = {'loss_sem_seg': 0,
                               'loss_rpn_cls': 0,
@@ -81,6 +83,19 @@ with open(os.path.join(save_dir, 'log.txt'), "w") as log:
         
         val_log = " - ".join(["{}: {:.3f}".format(k, v/len(valloader)) for k, v in epoch_val_losses.items()])
         print("Val: {val_log} \n" + "-"*50)
+        
+        if epoch%config.config.save_period:
+            torch.save(model.state_dict(), os.path.join(save_dir, f"sd_epoch_{epoch}.pt"))
+        
+        last_total_val_loss = 0
+        for _, v in epoch_val_losses.items():
+            last_total_val_loss = last_total_val_loss + v/len(valloader)
+        
+        if last_total_val_loss <= best_val_loss:
+            print(f"Save best checkpoint at epoch {epoch}, total val loss: {last_total_val_loss}")
+            torch.save(model.state_dict(), os.path.join(save_dir, f"best.pt"))
+            best_val_loss = last_total_val_loss
+            
         log.write(f"Epoch {epoch}/{max_iters}: \n Train: {train_log} \n Val: {val_log}" + "-"*50)
 
 

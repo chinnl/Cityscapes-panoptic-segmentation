@@ -152,8 +152,7 @@ class Standard_ROI_Heads(ROI_Head):
     ) -> Tuple[List[Instances], Dict[str, torch.tensor]]:
         
         del images
-        self.mask_head.training = self.box_head.training = self.box_predictor.training = self.training
-        
+       
         if self.training:
             assert targets, 'No targets found'
             proposals = self.label_and_sample_proposals(proposals, targets)

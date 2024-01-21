@@ -86,7 +86,8 @@ model:
     combine_instances_score_thresh: 0.3
     
 config:
-  max_iters: 10000
+  max_iters: 1000
+  save_period: 100
   optimizer: 
     name: Adam
     base_lr: 0.001
