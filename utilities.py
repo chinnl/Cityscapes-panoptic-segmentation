@@ -48,8 +48,11 @@ def create_dir(save_dir):
             increment = int(re.search(r'\d+$', save_dir).group()) 
             loc = re.search(r'\d+$', save_dir).span()[0]
             os.makedirs(save_dir[:loc] + "_" + str(increment + 1))
+            return save_dir[:loc] + "_" + str(increment + 1)
         else: 
             os.makedirs(save_dir + "_" + str(1))
+            return save_dir + "_" + str(1)
     else:
         os.makedirs(save_dir)
+        return save_dir
         

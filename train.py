@@ -19,7 +19,7 @@ model = model.to(device)
 optim = get_optimizer_by_name(config.config.optimizer, model)
 scheduler = get_scheduler_by_name(config.config.scheduler, optimizer=optim, max_iters=max_iters)
 trainloader, valloader = build_dataloader(config.data)
-create_dir(config.config.save_dir)
+save_dir = create_dir(config.config.save_dir)
 
 train_losses = {'loss_sem_seg': [],
                 'loss_rpn_cls': [],
@@ -33,7 +33,7 @@ val_losses = {'loss_sem_seg': [],
                 'loss_cls': [],
                 'loss_box_reg': [],
                 'loss_mask': []}
-with open(os.path.join(config.config.save_dir, 'log.txt'), "w") as log:
+with open(os.path.join(save_dir, 'log.txt'), "w") as log:
     for epoch in range(max_iters):
         model.train()
         epoch_train_losses = {'loss_sem_seg': 0,
@@ -49,7 +49,7 @@ with open(os.path.join(config.config.save_dir, 'log.txt'), "w") as log:
                               'loss_box_reg': 0,
                               'loss_mask': 0}
         
-        for batched_input in tqdm(trainloader):
+        for batched_input in trainloader:
             batch_losses = model(batched_input)
             total_train_loss = torch.tensor(0).to(model.device)
             for _, v in batch_losses.items():
@@ -85,7 +85,7 @@ with open(os.path.join(config.config.save_dir, 'log.txt'), "w") as log:
 
 
 train_log_pd = pd.DataFrame.from_dict(train_losses)
-train_log_pd.to_csv(os.path.join(config.config.save_dir, 'train_losses.txt'))
+train_log_pd.to_csv(os.path.join(save_dir, 'train_losses.txt'))
 
 val_log_pd = pd.DataFrame.from_dict(val_losses)
-val_log_pd.to_csv(os.path.join(config.config.save_dir, 'val_losses.txt'))
+val_log_pd.to_csv(os.path.join(save_dir, 'val_losses.txt'))
