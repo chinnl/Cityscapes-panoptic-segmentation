@@ -1,10 +1,10 @@
 data:
   train:
-    folder: D:\Data\Cityscapes\leftImg8bit\train
+    folder: /kaggle/input/cityscapes/Cityspaces/images/train
     batch_size: 4
   
   val:
-    folder: D:\Data\Cityscapes\leftImg8bit\val
+    folder: /kaggle/input/cityscapes/Cityspaces/images/val
     batch_size: 1
   
 
@@ -89,7 +89,7 @@ config:
   max_iters: 10000
   optimizer: 
     name: Adam
-    base_lr: 1e-3
+    base_lr: 0.001
   scheduler: 
     name: StepLR
     lr_factor: 0.1

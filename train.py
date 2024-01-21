@@ -2,10 +2,10 @@ from model_from_config import Panoptic_FPN_R50_Mask_RCNN
 from Data.data_loader import build_dataloader
 import anyconfig, munch
 import os
-from .utilities import get_optimizer_by_name, get_scheduler_by_name, create_dir
+from utilities import get_optimizer_by_name, get_scheduler_by_name, create_dir
 import torch
 import pandas as pd
-
+from tqdm import tqdm
 
 config_path = 'config.yaml'
 config = anyconfig.load(config_path)
@@ -49,7 +49,7 @@ with open(os.path.join(config.config.save_dir, 'log.txt'), "w") as log:
                               'loss_box_reg': 0,
                               'loss_mask': 0}
         
-        for batched_input in trainloader:
+        for batched_input in tqdm(trainloader):
             batch_losses = model(batched_input)
             total_train_loss = torch.tensor(0).to(model.device)
             for _, v in batch_losses.items():
@@ -62,9 +62,12 @@ with open(os.path.join(config.config.save_dir, 'log.txt'), "w") as log:
             
             for key in epoch_train_losses.keys():
                 epoch_train_losses[key] += batch_losses[key].item()
+        
+        train_log = " - ".join(["{}: {:.3f}".format(k, v/len(trainloader)) for k, v in epoch_train_losses.items()])
+        print(f"Epoch {epoch}/{max_iters}: \n Train: {train_log}")
                 
         with torch.no_grad():
-            for batched_input in valloader:
+            for batched_input in tqdm(valloader):
                 batch_losses = model(batched_input)
                 
                 for key in epoch_val_losses.keys():
@@ -75,10 +78,9 @@ with open(os.path.join(config.config.save_dir, 'log.txt'), "w") as log:
         
         for key in val_losses.keys():
             val_losses[key].append(epoch_val_losses[key]/len(valloader))
-            
-        train_log = " - ".join(["{}: {:.3f}".format(k, v/len(trainloader)) for k, v in epoch_train_losses.items()])
-        val_log = " - ".join(["{}: {:.3f}".format(k, v/len(valloader)) for k, v in epoch_val_losses.items()])
         
+        val_log = " - ".join(["{}: {:.3f}".format(k, v/len(valloader)) for k, v in epoch_val_losses.items()])
+        print("Val: {val_log} \n" + "-"*50)
         log.write(f"Epoch {epoch}/{max_iters}: \n Train: {train_log} \n Val: {val_log}" + "-"*50)
 
 

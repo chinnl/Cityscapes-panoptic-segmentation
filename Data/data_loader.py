@@ -7,7 +7,7 @@ from structures import BoxMode
 import os
 import glob
 from .augmentation_impl import RandomFlip, ResizeShortestEdge
-from .distributed_sampler import TrainingSampler, InferenceSampler
+from .distributed_sampler import TrainingSampler
 from .common import ToIterableDataset, MapDataset
 
 
@@ -17,20 +17,20 @@ class Cityscapes(Dataset):
                  ):
         super().__init__()
         self.data_folder = data_folder
-        image_list = glob.glob(data_folder + "\\*\\*")
-        gt_dir = data_folder.replace("\\leftImg8bit\\", "\\gtFine\\")
+        image_list = glob.glob(data_folder + "/*/*")
+        gt_dir = data_folder.replace("/images/", "/gtFine/")
         
         self.file_name = []
         self.sem_seg_file_name = []
         self.annotations = []
         
         for idx in range(len(image_list)):
-            file_name = image_list[idx].split("\\")[-1].replace("_leftImg8bit.png", "")
+            file_name = image_list[idx].split("/")[-1].replace("_leftImg8bit.png", "")
             city_name = file_name.split("_")[0]
-            annotation = read_json_file(os.path.join(gt_dir, city_name + "\\" + file_name + "_gtFine_polygons.json"))
+            annotation = read_json_file(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_polygons.json"))
             
             self.file_name.append(image_list[idx])
-            self.sem_seg_file_name.append(os.path.join(gt_dir, city_name + "\\" + file_name + "_gtFine_labelIds.png"))
+            self.sem_seg_file_name.append(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_labelIds.png"))
 
             anno = []
             
@@ -55,9 +55,6 @@ class Cityscapes(Dataset):
                     }
                 )
             self.annotations.append(anno)
-            
-            if idx == 15: 
-                break
             
     def __len__(self):
         return len(self.file_name)
