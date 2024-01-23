@@ -95,5 +95,5 @@ config:
   scheduler: 
     name: StepLR
     lr_factor: 0.1
-    step: 1000
+    step: 100
   save_dir: './saver'
