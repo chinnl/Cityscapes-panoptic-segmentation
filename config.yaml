@@ -18,7 +18,8 @@ model:
 
   anchor_generator:
     anchor_sizes: [32,64,128,256,512] # One anchor size for each feature map level
-    anchor_ratios: [0.5, 1.0, 2.0] # All 3 anchor ratios for each feature map level
+    # anchor_ratios: [0.5, 1.0, 2.0] # All 3 anchor ratios for each feature map level
+    anchor_ratios: [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
     anchor_strides: [4,8,16,32,64] # One anchor stride for each feature map level
 
   rpn:

@@ -82,9 +82,9 @@ with open(os.path.join(save_dir, 'log.txt'), "w") as log:
             val_losses[key].append(epoch_val_losses[key]/len(valloader))
         
         val_log = " - ".join(["{}: {:.3f}".format(k, v/len(valloader)) for k, v in epoch_val_losses.items()])
-        print("Val: {val_log} \n" + "-"*50)
+        print(f"Val: {val_log} \n" + "-"*50)
         
-        if epoch%config.config.save_period:
+        if epoch%config.config.save_period == 0:
             torch.save(model.state_dict(), os.path.join(save_dir, f"sd_epoch_{epoch}.pt"))
         
         last_total_val_loss = 0

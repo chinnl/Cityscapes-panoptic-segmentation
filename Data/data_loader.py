@@ -7,8 +7,8 @@ from structures import BoxMode
 import os
 import glob
 from .augmentation_impl import RandomFlip, ResizeShortestEdge
-from .distributed_sampler import TrainingSampler
-from .common import ToIterableDataset, MapDataset
+# from .distributed_sampler import TrainingSampler
+# from .common import ToIterableDataset, MapDataset
 
 
 class Cityscapes(Dataset):
@@ -45,12 +45,12 @@ class Cityscapes(Dataset):
                 iscrowd = int(obj_dict['label'].endswith('group'))
                 
                 polygon = np.array(obj_dict['polygon'])
-                bbox = obj_dict['polygon'][np.argmin(np.sum(polygon, axis = 1))] + obj_dict['polygon'][np.argmax(np.sum(polygon, axis = 1))]
+                bbox = [np.min(polygon[:, 0]), np.min(polygon[:, 1]), np.max(polygon[:, 0]), np.max(polygon[:, 1])]
                 
                 try:
-                    category_id = name2label[obj_dict['label']].categoryId
+                    category_id = name2label[obj_dict['label']].id
                 except:
-                    category_id = name2label[obj_dict['label'].replace("group", "")].categoryId
+                    category_id = name2label[obj_dict['label'].replace("group", "")].id
                     
                 anno.append(
                     {
