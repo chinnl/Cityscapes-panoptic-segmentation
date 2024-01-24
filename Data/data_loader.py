@@ -7,6 +7,7 @@ from structures import BoxMode
 import os
 import glob
 from .augmentation_impl import RandomFlip, ResizeShortestEdge
+import cv2
 # from .distributed_sampler import TrainingSampler
 # from .common import ToIterableDataset, MapDataset
 
@@ -52,15 +53,16 @@ class Cityscapes(Dataset):
                 except:
                     category_id = name2label[obj_dict['label'].replace("group", "")].id
                     
-                anno.append(
-                    {
-                        'segmentation': [polygon],
-                        'bbox': bbox,
-                        'bbox_mode': BoxMode.XYXY_ABS,
-                        'iscrowd': iscrowd,
-                        'category_id': category_id,
-                    }
-                )
+                if cv2.contourArea(polygon) != 0 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
+                    anno.append(
+                        {
+                            'segmentation': [polygon],
+                            'bbox': bbox,
+                            'bbox_mode': BoxMode.XYXY_ABS,
+                            'iscrowd': iscrowd,
+                            'category_id': category_id,
+                        }
+                    )
             self.annotations.append(anno)
             
     def __len__(self):

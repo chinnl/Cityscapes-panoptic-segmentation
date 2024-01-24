@@ -100,7 +100,7 @@ with open(os.path.join(save_dir, 'log.txt'), "w") as log:
 
 
 train_log_pd = pd.DataFrame.from_dict(train_losses)
-train_log_pd.to_csv(os.path.join(save_dir, 'train_losses.txt'))
+train_log_pd.to_csv(os.path.join(save_dir, 'train_losses.csv'))
 
 val_log_pd = pd.DataFrame.from_dict(val_losses)
-val_log_pd.to_csv(os.path.join(save_dir, 'val_losses.txt'))
+val_log_pd.to_csv(os.path.join(save_dir, 'val_losses.csv'))
