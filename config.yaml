@@ -10,7 +10,7 @@ data:
 
 model:
   general:
-    num_classes: 35
+    num_classes: 25
     input_shape: [512,1024]
     padding_constraint:
       square_size: 0

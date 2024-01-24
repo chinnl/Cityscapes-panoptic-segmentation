@@ -30,7 +30,7 @@ class RPN_Head(nn.Module):
         self.feature_emb_conv = nn.Conv2d(C, C, kernel_size = 3, bias = False, padding = 1)
         self.norm1 = nn.BatchNorm2d(C)
         
-        self.objness_logit_conv = nn.Conv2d(C, out_channels = 3, kernel_size = 1, bias = False)
+        self.objness_logit_conv = nn.Conv2d(C, num_cell_anchors, kernel_size = 1, bias = False)
 
         self.anchor_delta_conv = nn.Conv2d(C, box_dims*num_cell_anchors, kernel_size = 1, bias = False)
         
@@ -240,7 +240,7 @@ class RPN(nn.Module):
             box_reg_loss_type=self.box_reg_loss_type,
             smooth_l1_beta=self.smooth_l1_beta,
         )
-        valid_mask = gt_labels > 0 #Return True where foreground and background box are
+        valid_mask = gt_labels >= 0 #Return True in loc of foreground and background boxes
         objectness_loss = nn.functional.binary_cross_entropy_with_logits(
             cat(pred_objectness_logits, dim=1)[valid_mask],
             gt_labels[valid_mask].to(torch.float32),
