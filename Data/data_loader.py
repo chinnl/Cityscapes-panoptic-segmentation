@@ -2,7 +2,7 @@ from .dataset_mapper import Dataset_mapper
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from .data_utils import read_json_file
-from .labels import name2label
+from .labels import name2label, labels
 from structures import BoxMode
 import os
 import glob
@@ -31,6 +31,7 @@ class Cityscapes(Dataset):
         self.file_name = []
         self.sem_seg_file_name = []
         self.annotations = []
+        num_classes = len(set([label.trainId for label in labels]))
         
         for idx in range(len(image_list)):
             file_name = image_list[idx].split("/")[-1].replace("_leftImg8bit.png", "")
@@ -52,6 +53,8 @@ class Cityscapes(Dataset):
                     category_id = name2label[obj_dict['label']].trainId
                 except:
                     category_id = name2label[obj_dict['label'].replace("group", "")].trainId
+                
+                if category_id == 255: category_id = num_classes - 1
                     
                 if cv2.contourArea(polygon) != 0 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
                     anno.append(
