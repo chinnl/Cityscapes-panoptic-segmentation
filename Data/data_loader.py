@@ -49,9 +49,9 @@ class Cityscapes(Dataset):
                 bbox = [np.min(polygon[:, 0]), np.min(polygon[:, 1]), np.max(polygon[:, 0]), np.max(polygon[:, 1])]
                 
                 try:
-                    category_id = name2label[obj_dict['label']].id
+                    category_id = name2label[obj_dict['label']].trainId
                 except:
-                    category_id = name2label[obj_dict['label'].replace("group", "")].id
+                    category_id = name2label[obj_dict['label'].replace("group", "")].trainId
                     
                 if cv2.contourArea(polygon) != 0 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
                     anno.append(
