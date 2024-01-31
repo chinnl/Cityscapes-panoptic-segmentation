@@ -11,24 +11,28 @@ class FPN(nn.Module):
 
         self.in_channels = [feature.shape[1] for _, feature in dummy_input.items()]
         self.lat_conv2 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-1], C, kernel_size = 1, stride = 1, bias = False), 
-                                nn.BatchNorm2d(C)
+                                nn.Conv2d(self.in_channels[-1], C, kernel_size = 1, stride = 1, bias = True), 
                                 ) #P2
         self.lat_conv3 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-2], C, kernel_size = 1, stride = 1, bias = False), 
-                                nn.BatchNorm2d(C)
+                                nn.Conv2d(self.in_channels[-2], C, kernel_size = 1, stride = 1, bias = True), 
                                 ) #P3
         self.lat_conv4 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-3], C, kernel_size = 1, stride = 1, bias = False), 
-                                nn.BatchNorm2d(C)
+                                nn.Conv2d(self.in_channels[-3], C, kernel_size = 1, stride = 1, bias = True), 
                                 ) #P4
         self.lat_conv5 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-4], C, kernel_size = 1, stride = 1, bias = False), 
-                                nn.BatchNorm2d(C)
+                                nn.Conv2d(self.in_channels[-4], C, kernel_size = 1, stride = 1, bias = True), 
                                 ) #P5
-        self.output_conv = nn.Sequential(
-                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = False, padding = 1),
-                                nn.BatchNorm2d(C),
+        self.output_conv2 = nn.Sequential(
+                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
+                                )
+        self.output_conv3 = nn.Sequential(
+                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
+                                )
+        self.output_conv4 = nn.Sequential(
+                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
+                                )
+        self.output_conv5 = nn.Sequential(
+                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
                                 )
     def forward(self, input: Dict):
         top_downs = []
@@ -44,8 +48,8 @@ class FPN(nn.Module):
             
         P6 = nn.MaxPool2d(kernel_size = 1, stride = 2)(top_downs[0])
         output = []
-        for out_stage in reversed(top_downs):
-            out_stage = self.output_conv(out_stage)
+        for out_stage, output_conv in zip(reversed(top_downs), [self.output_conv2, self.output_conv3, self.output_conv4, self.output_conv5]):
+            out_stage = output_conv(out_stage)
             output.append(out_stage)
         output.append(P6)
         output_dict = {}

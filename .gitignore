@@ -6,7 +6,7 @@ ckpt
 *.pkl
 *.npy
 *.ts
-
+*.pt
 *.png
 *.json
 *.diff
@@ -21,3 +21,4 @@ _darcs
 
 test.py
 test.ipynb
+saver/

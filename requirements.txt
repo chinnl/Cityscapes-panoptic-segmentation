@@ -1,6 +1,6 @@
 '''
-This repo require scikit-image package for data augmentation. But install scikit-image via `pip install scikit-image` may
-results in error due to requirement of pyproject.toml-bases projects. 
+This repo requires scikit-image package for data augmentation. But installing scikit-image via `pip install scikit-image` may
+results in error due to requirement of pyproject.toml-based projects. 
 Thus, scikit-image and related packages should be installed via `pip install --pre scikit-image` before installing other
 packages in this file.
 '''
@@ -44,6 +44,7 @@ mypy-extensions==1.0.0
 oauthlib==3.2.2
 omegaconf==2.3.0
 opencv-python==4.8.0.76
+pandas==2.2.0
 pathspec==0.11.2
 # Pillow==10.0.0
 portalocker==2.7.0

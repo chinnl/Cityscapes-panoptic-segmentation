@@ -94,9 +94,9 @@ class ROI_Head(nn.Module):
             num_fg_samples.append(gt_classes.numel() - num_bg_samples[-1])
             proposals_with_gt.append(proposals_per_image)
         
-        with EventStorage() as storage:
-            storage.put_scalar("roi_head/num_fg_samples", np.mean(num_fg_samples))
-            storage.put_scalar("roi_head/num_bg_samples", np.mean(num_bg_samples))
+        # with EventStorage() as storage:
+        #     storage.put_scalar("roi_head/num_fg_samples", np.mean(num_fg_samples))
+        #     storage.put_scalar("roi_head/num_bg_samples", np.mean(num_bg_samples))
         
         return proposals_with_gt
     

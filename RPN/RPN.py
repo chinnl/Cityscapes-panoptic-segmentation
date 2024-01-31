@@ -27,7 +27,7 @@ class RPN_Head(nn.Module):
     def __init__(self, box_dims, num_cell_anchors) -> None:
         super(RPN_Head, self).__init__()
         
-        self.feature_emb_conv = nn.Conv2d(C, C, kernel_size = 3, bias = False, padding = 1)
+        self.conv = nn.Conv2d(C, C, kernel_size = 3, bias = False, padding = 1)
         self.norm1 = nn.BatchNorm2d(C)
         
         self.objness_logit_conv = nn.Conv2d(C, num_cell_anchors, kernel_size = 1, bias = False)
@@ -40,7 +40,7 @@ class RPN_Head(nn.Module):
         pred_anchor_deltas = []
         emb_features = []
         for _, feature_map in input_features.items():
-            emb_feature = self.feature_emb_conv(feature_map)
+            emb_feature = self.conv(feature_map)
             emb_feature = self.norm1(emb_feature)
             emb_features.append(emb_feature)
             

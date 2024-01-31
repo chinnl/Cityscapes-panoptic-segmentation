@@ -1,10 +1,10 @@
 data:
   train:
-    folder: /kaggle/input/cityscapes/Cityspaces/images/train
-    batch_size: 4
+    folder: /home/chinnl/data/leftImg8bit/train
+    batch_size: 2
   
   val:
-    folder: /kaggle/input/cityscapes/Cityspaces/images/val
+    folder: /home/chinnl/data/leftImg8bit/val
     batch_size: 1
   
 
@@ -18,17 +18,17 @@ model:
 
   anchor_generator:
     anchor_sizes: [32,64,128,256,512] # One anchor size for each feature map level
-    # anchor_ratios: [0.5, 1.0, 2.0] # All 3 anchor ratios for each feature map level
-    anchor_ratios: [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+    anchor_ratios: [0.5, 1.0, 2.0] # All 3 anchor ratios for each feature map level
+    # anchor_ratios: [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
     anchor_strides: [4,8,16,32,64] # One anchor stride for each feature map level
 
   rpn:
     batch_size_per_img: 256 # Total number of anchor boxes will be sampled
     positive_fraction: 0.5 # Number of positive boxes / number of negative boxes
     pre_nms_topk: [8000, 1000] # Number of boxes for selecting before NMS [for train = 8000, for test = 1000]
-    post_nms_topk: [1000, 500] # Number of boxes for selecting after NMS [for train = 1000, for test = 500]
+    post_nms_topk: [1000, 1000] # Number of boxes for selecting after NMS [for train = 1000, for test = 500]
     nms_thresh: 0.5 
-    loss_weights: {'loss_rpn_cls': 0.3, 'loss_rpn_loc': 0.5}
+    loss_weights: {'loss_rpn_cls': 0.5, 'loss_rpn_loc': 0.3}
     min_box_size: 0.0 
     box_reg_loss_type: smooth_l1
     box_transform_weights: [1.0, 1.0, 1.0, 1.0]
@@ -69,6 +69,7 @@ model:
     input_shape: [256,14,14]
     conv_dims: [256, 256, 256, 256, 256]
     conv_norm: ''
+    loss_weight: 1.0
 
   roi_heads:
     batch_size_per_img: 256
@@ -80,6 +81,9 @@ model:
     box_in_features: [P2, P3, P4, P5]
     mask_in_features: [P2, P3, P4, P5]
     train_on_pred_boxes: false
+  
+  semantic_head:
+    loss_weight: 0.3
 
   panoptic_head:
     combine_overlap_thresh: 0.8
@@ -87,13 +91,14 @@ model:
     combine_instances_score_thresh: 0.3
     
 config:
-  max_iters: 1000
-  save_period: 100
+  warmup_steps: 3
+  max_iters: 100
+  save_period: 20
   optimizer: 
-    name: Adam
-    base_lr: 0.001
+    name: SGD
+    base_lr: 0.0025
   scheduler: 
     name: StepLR
     lr_factor: 0.1
-    step: 100
-  save_dir: './saver'
+    step: 10
+  save_dir: './saver/exp'

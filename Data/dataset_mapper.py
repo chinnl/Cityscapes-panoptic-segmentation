@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 import copy
 from fvcore.transforms.transform import Transform
 from .data_utils import *
@@ -20,6 +20,7 @@ class Dataset_mapper:
                                                                 # and keep the top k proposals for each image.
                  recompute_boxes: bool = False, #whether to overwrite bounding box annotations
                                                 # by computing tight bounding boxes from instance mask annotations.
+                 label_mapping: Dict[int, int] #whether to map 255 to nc-1 (ignored value)
                  ):
         if recompute_boxes:
             assert use_instance_mask, "Recompute boxes require instance masks!"
@@ -35,7 +36,7 @@ class Dataset_mapper:
         self.instance_mask_format = instance_mask_format
         self.proposal_topk = precomputed_proposal_topk
         self.recompute_boxes = recompute_boxes
-        
+        self.label_mapping = label_mapping
     def __call__(self, dataset_dict):
         dataset_dict = copy.deepcopy(dataset_dict)
         
@@ -44,6 +45,12 @@ class Dataset_mapper:
         
         if "sem_seg_file_name" in dataset_dict:
             sem_seg_gt = read_image(dataset_dict.pop("sem_seg_file_name"), "L").squeeze(2)
+            mapped_sem_seg = sem_seg_gt.copy()
+            if self.label_mapping is not None:
+                for k, v in self.label_mapping.items():
+                    mapped_sem_seg[sem_seg_gt == k] = v
+            sem_seg_gt = mapped_sem_seg
+            del mapped_sem_seg
         else:
             sem_seg_gt = None
         

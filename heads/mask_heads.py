@@ -7,6 +7,8 @@ from layers import cat, ShapeSpec, get_norm
 from structures import Instances, Boxes
 from utils.events import EventStorage
 import torch.nn.functional as F
+import fvcore.nn.weight_init as weight_init
+
 
 def mask_rcnn_loss(
     pred_mask_logits: torch.tensor, #Tensor of shape BCHW, HW is height, width of the mask, 
@@ -14,7 +16,6 @@ def mask_rcnn_loss(
     instances: List[Instances], #A list of N instances, where N is the number of image in the batch. 
                                 #These Instances are in 1:1 corresponding with the pred_mask_logits. 
                                 #The gt labels associated with each Instances are stored in fields.
-    vis_period: int = 0,
 ):
     cls_agnostic_mask = pred_mask_logits.size(1) == 1
     total_num_mask = pred_mask_logits.size(0)
@@ -62,18 +63,18 @@ def mask_rcnn_loss(
     )
     false_negative = (mask_incorrect & gt_masks_bool).sum().item() / max(num_positive, 1.0)
     
-    with EventStorage() as storage:
-        storage.put_scalar("mask_rcnn/accuracy", mask_accuracy)
-        storage.put_scalar("mask_rcnn/false_positive", false_positive)
-        storage.put_scalar("mask_rcnn/false_negative", false_negative)
+    # with EventStorage() as storage:
+    #     storage.put_scalar("mask_rcnn/accuracy", mask_accuracy)
+    #     storage.put_scalar("mask_rcnn/false_positive", false_positive)
+    #     storage.put_scalar("mask_rcnn/false_negative", false_negative)
     
-    if vis_period > 0 and storage.iter % vis_period == 0:
-        pred_masks = pred_mask_logits.sigmoid()
-        vis_masks = torch.cat([pred_masks, gt_masks], axis = 2)
-        name = "Left: mask prediction;      Right: gt masks"
-        for idx, vis_mask in enumerate(vis_masks):
-            vis_mask = torch.stack([vis_mask]*3, axis = 0)
-            storage.put_image(name + f" ({idx})", vis_mask)
+    # if vis_period > 0 and storage.iter % vis_period == 0:
+    #     pred_masks = pred_mask_logits.sigmoid()
+    #     vis_masks = torch.cat([pred_masks, gt_masks], axis = 2)
+    #     name = "Left: mask prediction;      Right: gt masks"
+    #     for idx, vis_mask in enumerate(vis_masks):
+    #         vis_mask = torch.stack([vis_mask]*3, axis = 0)
+    #         storage.put_image(name + f" ({idx})", vis_mask)
     
     mask_loss = F.binary_cross_entropy_with_logits(pred_mask_logits, gt_masks, reduction='mean')
     return mask_loss
@@ -100,9 +101,8 @@ def mask_rcnn_inference(
         instances.pred_masks = prob
         
 class Base_Mask_RCNN_Head(nn.Module):
-    def __init__(self, *, loss_weights: float = 1.0, vis_period: int = 0):
+    def __init__(self, *, loss_weights: float = 1.0):
         super().__init__()
-        self.vis_period = vis_period
         self.loss_weights = loss_weights
         
     def forward(
@@ -112,7 +112,7 @@ class Base_Mask_RCNN_Head(nn.Module):
     ):
         x = self.layers(x)
         if self.training:
-            return {"loss_mask": mask_rcnn_loss(x, instances, self.vis_period) * self.loss_weights}
+            return {"loss_mask": mask_rcnn_loss(x, instances) * self.loss_weights}
         else:
             mask_rcnn_inference(x, instances)
             return instances
@@ -140,27 +140,24 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
         self.conv_norm_relus = []
         cur_channels = input_shape.channels
         for k, conv_dim in enumerate(conv_dims[:-1]):
-            if conv_norm != '':
-                conv = nn.Sequential(
-                    Conv2d(cur_channels,
+            _conv = Conv2d(cur_channels,
                             conv_dim,
                             kernel_size=3,
                             stride=1,
                             padding=1,
                             bias=not conv_norm,
-                            ),
+                            )
+            weight_init.c2_msra_fill(_conv)
+            
+            if conv_norm != '':
+                conv = nn.Sequential(
+                    _conv,
                     get_norm(conv_norm, conv_dims),
                     ReLU(),
                     )
             else:
                 conv = nn.Sequential(
-                    Conv2d(cur_channels,
-                            conv_dim,
-                            kernel_size=3,
-                            stride=1,
-                            padding=1,
-                            bias=not conv_norm,
-                            ),
+                    _conv,
                     ReLU(),
                     )
             self.add_module("mask_fcn{}".format(k + 1), conv)
@@ -174,11 +171,9 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
         cur_channels = conv_dims[-1]
         
         self.predictor = Conv2d(cur_channels, num_classes, kernel_size=1, stride=1, padding=0)
-        
-        # for layer in self.conv_norm_relus + [self.deconv]:
-        #     weight_init.c2_msra_fill(layer)
-        # # use normal distribution initialization for mask prediction layer
-        
+            
+        weight_init.c2_msra_fill(self.deconv)
+        # use normal distribution initialization for mask prediction layer
         nn.init.normal_(self.predictor.weight, std = 0.001)
         if self.predictor.bias is not None:
             nn.init.constant_(self.predictor.bias, 0)

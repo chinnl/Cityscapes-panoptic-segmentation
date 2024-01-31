@@ -17,9 +17,10 @@ class Cityscapes(Dataset):
                  data_folder: str,
                  ):
         super().__init__()
+        num_classes = len(set([label.trainId for label in labels]))
         self.data_folder = data_folder
-        image_list = glob.glob(data_folder + "/*/*")
-        gt_dir = data_folder.replace("/images/", "/gtFine/")
+        self.image_list = glob.glob(data_folder + "/*/*")
+        gt_dir = data_folder.replace("/leftImg8bit/", "/gtFine/")
         self.data_mapper = Dataset_mapper(is_train=True,
                             use_instance_mask = True,
                             augmentations=[RandomFlip(), 
@@ -27,19 +28,20 @@ class Cityscapes(Dataset):
                             image_format='BGR',
                             instance_mask_format='bitmask',
                             precomputed_proposal_topk=None,
-                            recompute_boxes=True)
+                            recompute_boxes=True,
+                            label_mapping={255: num_classes - 1})
         self.file_name = []
         self.sem_seg_file_name = []
         self.annotations = []
-        num_classes = len(set([label.trainId for label in labels]))
         
-        for idx in range(len(image_list)):
-            file_name = image_list[idx].split("/")[-1].replace("_leftImg8bit.png", "")
+        
+        for idx in range(len(self.image_list)):
+            file_name = self.image_list[idx].split("/")[-1].replace("_leftImg8bit.png", "")
             city_name = file_name.split("_")[0]
             annotation = read_json_file(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_polygons.json"))
             
-            self.file_name.append(image_list[idx])
-            self.sem_seg_file_name.append(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_labelIds.png"))
+            self.file_name.append(self.image_list[idx])
+            self.sem_seg_file_name.append(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_labelTrainIds.png"))
 
             anno = []
             
@@ -49,11 +51,12 @@ class Cityscapes(Dataset):
                 polygon = np.array(obj_dict['polygon'])
                 bbox = [np.min(polygon[:, 0]), np.min(polygon[:, 1]), np.max(polygon[:, 0]), np.max(polygon[:, 1])]
                 
-                try:
-                    category_id = name2label[obj_dict['label']].trainId
+                try: 
+                    label = name2label[obj_dict['label']]
                 except:
-                    category_id = name2label[obj_dict['label'].replace("group", "")].trainId
+                    label = name2label[obj_dict['label'].replace("group", "")]
                 
+                category_id = label.trainId
                 if category_id == 255: category_id = num_classes - 1
                     
                 if cv2.contourArea(polygon) != 0 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
@@ -69,7 +72,7 @@ class Cityscapes(Dataset):
             self.annotations.append(anno)
             
     def __len__(self):
-        return len(self.file_name)
+        return len(self.image_list)
     
     def __getitem__(self, idx):
         return self.data_mapper({
@@ -94,6 +97,7 @@ def build_dataloader(cfg):
     cityscapes_train = Cityscapes(train_folder)
     cityscapes_val = Cityscapes(val_folder)
     
+    assert len(cityscapes_train)*len(cityscapes_val) != 0, "Dataset len = 0"
     # cityscapes_train = MapDataset(Cityscapes(train_folder), data_mapper)
     # cityscapes_val = MapDataset(Cityscapes(val_folder), data_mapper)
 
@@ -109,6 +113,7 @@ def build_dataloader(cfg):
     
     trainloader = DataLoader(cityscapes_train,
                             batch_size=cfg.train.batch_size,
+                            shuffle=False,
                             drop_last=False,
                             num_workers=4,
                             collate_fn=trivial_batch_collator,

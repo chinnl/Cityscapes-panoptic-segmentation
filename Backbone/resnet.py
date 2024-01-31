@@ -12,20 +12,20 @@ class R50(nn.Module):
         )
         self.in_channels = 64
         self.layers = [3, 4, 6, 3] #Original config for R50 
-        self.layer1 = self.make_layers(BottleneckBlock, self.layers[0], out_channels=64, stride = 1)
-        self.layer2 = self.make_layers(BottleneckBlock, self.layers[1], out_channels=128, stride = 2)
-        self.layer3 = self.make_layers(BottleneckBlock, self.layers[2], out_channels=256, stride = 2)
-        self.layer4 = self.make_layers(BottleneckBlock, self.layers[3], out_channels=512, stride = 2)
+        self.res2 = self.make_layers(BottleneckBlock, self.layers[0], out_channels=256, stride = 1)
+        self.res3 = self.make_layers(BottleneckBlock, self.layers[1], out_channels=128, stride = 2)
+        self.res4 = self.make_layers(BottleneckBlock, self.layers[2], out_channels=256, stride = 2)
+        self.res5 = self.make_layers(BottleneckBlock, self.layers[3], out_channels=512, stride = 2)
         
     def forward(self, x: torch.tensor):
         '''
         Input size: B x 3 x H x W
         '''
         x = self.stem(x)
-        res2 = self.layer1(x)
-        res3 = self.layer2(res2)
-        res4 = self.layer3(res3)
-        res5 = self.layer4(res4)
+        res2 = self.res2(x)
+        res3 = self.res3(res2)
+        res4 = self.res4(res3)
+        res5 = self.res5(res4)
         
         # output = [res5, res4, res3, res2]
         output = {
