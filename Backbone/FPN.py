@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from typing import Dict
+from fvcore.nn import weight_init
 
 C = 256
 class FPN(nn.Module):
@@ -10,30 +11,18 @@ class FPN(nn.Module):
         super(FPN, self).__init__()
 
         self.in_channels = [feature.shape[1] for _, feature in dummy_input.items()]
-        self.lat_conv2 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-1], C, kernel_size = 1, stride = 1, bias = True), 
-                                ) #P2
-        self.lat_conv3 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-2], C, kernel_size = 1, stride = 1, bias = True), 
-                                ) #P3
-        self.lat_conv4 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-3], C, kernel_size = 1, stride = 1, bias = True), 
-                                ) #P4
-        self.lat_conv5 = nn.Sequential(
-                                nn.Conv2d(self.in_channels[-4], C, kernel_size = 1, stride = 1, bias = True), 
-                                ) #P5
-        self.output_conv2 = nn.Sequential(
-                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
-                                )
-        self.output_conv3 = nn.Sequential(
-                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
-                                )
-        self.output_conv4 = nn.Sequential(
-                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
-                                )
-        self.output_conv5 = nn.Sequential(
-                                nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1),
-                                )
+        self.lat_conv2 = nn.Conv2d(self.in_channels[-1], C, kernel_size = 1, stride = 1, bias = True) 
+        self.lat_conv3 = nn.Conv2d(self.in_channels[-2], C, kernel_size = 1, stride = 1, bias = True)
+        self.lat_conv4 = nn.Conv2d(self.in_channels[-3], C, kernel_size = 1, stride = 1, bias = True)
+        self.lat_conv5 = nn.Conv2d(self.in_channels[-4], C, kernel_size = 1, stride = 1, bias = True)
+        self.output_conv2 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
+        self.output_conv3 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
+        self.output_conv4 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
+        self.output_conv5 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
+        
+        # for layer in self.children():
+        #     weight_init.c2_msra_fill(layer)
+            
     def forward(self, input: Dict):
         top_downs = []
         for P_i, lat_conv in zip(input.values(), [self.lat_conv5, self.lat_conv4, self.lat_conv3, self.lat_conv2]):

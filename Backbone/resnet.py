@@ -1,18 +1,20 @@
 import torch
 import torch.nn as nn
+from layers.batch_norm import get_norm
 
 class R50(nn.Module):
     def __init__(self) -> None:
         super(R50, self).__init__()
         self.stem = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size = (7,7), stride = 2, padding = 3, bias = False),
-            nn.BatchNorm2d(64),
+            # nn.BatchNorm2d(64),
+            get_norm('FrozenBN', 64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size = (3,3), stride = 2, padding = 1)
         )
         self.in_channels = 64
         self.layers = [3, 4, 6, 3] #Original config for R50 
-        self.res2 = self.make_layers(BottleneckBlock, self.layers[0], out_channels=256, stride = 1)
+        self.res2 = self.make_layers(BottleneckBlock, self.layers[0], out_channels=64, stride = 1)
         self.res3 = self.make_layers(BottleneckBlock, self.layers[1], out_channels=128, stride = 2)
         self.res4 = self.make_layers(BottleneckBlock, self.layers[2], out_channels=256, stride = 2)
         self.res5 = self.make_layers(BottleneckBlock, self.layers[3], out_channels=512, stride = 2)

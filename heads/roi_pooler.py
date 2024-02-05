@@ -15,7 +15,6 @@ def assign_boxes_to_levels(
 ):
     box_sizes = torch.sqrt(cat([boxes.area() for boxes in box_lists]))
     level_assignments = torch.floor(canonical_level + torch.log2(box_sizes/canonical_box_size + 1e-8))
-    #In the original scripts, they use `math.log2`. But it results in a ValueError: "Only one element tensors can be converted to Python scalars" so I changed to `torch.log2` for tensor inputs.
     level_assignments = torch.clamp(level_assignments, min=min_level, max=max_level) #All the element < min_level will be set to min_level
                                                                                      #Same as all the element > max_level
     return level_assignments.to(torch.int64) - min_level

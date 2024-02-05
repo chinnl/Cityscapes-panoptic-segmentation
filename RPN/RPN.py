@@ -8,8 +8,7 @@ from typing import List, Tuple, Dict
 from Backbone import FPN, R50
 from layers import cat
 from structures import ImageList, Instances, pairwise_iou
-
-C = 256
+from fvcore.nn import weight_init
 
 class RPN_Head(nn.Module):
     '''
@@ -24,15 +23,18 @@ class RPN_Head(nn.Module):
                 N: batch size,
                 A; number of cell anchors
     '''
-    def __init__(self, box_dims, num_cell_anchors) -> None:
+    def __init__(self, box_dims, num_cell_anchors, in_channels = 256) -> None:
         super(RPN_Head, self).__init__()
         
-        self.conv = nn.Conv2d(C, C, kernel_size = 3, bias = False, padding = 1)
-        self.norm1 = nn.BatchNorm2d(C)
-        
-        self.objness_logit_conv = nn.Conv2d(C, num_cell_anchors, kernel_size = 1, bias = False)
+        self.conv = nn.Conv2d(in_channels, in_channels, kernel_size = 3, bias = True, padding = 1)
+        # self.norm1 = nn.BatchNorm2d(in_channels)
+        self.objness_logit_conv = nn.Conv2d(in_channels, num_cell_anchors, kernel_size = 1, bias = False)
 
-        self.anchor_delta_conv = nn.Conv2d(C, box_dims*num_cell_anchors, kernel_size = 1, bias = False)
+        self.anchor_delta_conv = nn.Conv2d(in_channels, box_dims*num_cell_anchors, kernel_size = 1, bias = False)
+        # weight_init.c2_msra_fill(self.conv)
+        # weight_init.c2_msra_fill(self.objness_logit_conv)
+        # weight_init.c2_msra_fill(self.anchor_delta_conv)
+        
         
     def forward(self, input_features):
         #input_features: list of feature maps
@@ -41,7 +43,6 @@ class RPN_Head(nn.Module):
         emb_features = []
         for _, feature_map in input_features.items():
             emb_feature = self.conv(feature_map)
-            emb_feature = self.norm1(emb_feature)
             emb_features.append(emb_feature)
             
         pred_objectness_logits = self.get_objectness_logit(emb_features)

@@ -4,12 +4,12 @@ import torch
 import torch.nn.functional as F
 from torch.nn import Conv2d, ReLU, Flatten, Linear
 import torch.nn as nn
-from layers import ShapeSpec, get_norm, cat, cross_entropy, batched_nms
-from utils.events import EventStorage
+from layers import ShapeSpec, get_norm, cat, batched_nms
 from layers.wrappers import nonzero_tuple
 from RPN.box_regression import _dense_box_regression_loss
 from structures import Instances, Boxes
-
+from layers.wrappers import cross_entropy
+from fvcore.nn import weight_init
 
 class Fast_RCNN_Conv_FC_Head(nn.Sequential):
     def __init__(self,
@@ -30,24 +30,24 @@ class Fast_RCNN_Conv_FC_Head(nn.Sequential):
         self.conv_norm_relus = []
         
         for k, conv_dim in enumerate(conv_dims):
-            conv = nn.Sequential(
-                Conv2d(self._output_size[0],
+            _conv = Conv2d(self._output_size[0],
                        conv_dim,
                        kernel_size=3,
                        padding=1,
-                       bias=not conv_norm),
+                       bias=not conv_norm)
+            
+            weight_init.c2_msra_fill(_conv)
+            
+            conv = nn.Sequential(
+                _conv,
                 get_norm(conv_norm, conv_dim),
                 ReLU(),
                 ) if conv_norm != "" else nn.Sequential(
-                    Conv2d(self._output_size[0],
-                        conv_dim,
-                        kernel_size=3,
-                        padding=1,
-                        bias=not conv_norm),
+                    _conv,
                     ReLU(),)
             self.add_module("conv{}".format(k + 1), conv)
             self.conv_norm_relus.append(conv)
-            self._output_size = (conv_dim, self._output_size[1], self._output_size[2])
+            self._output_size = (conv_dim, self._output_size[1], self._output_size[2])        
         
         self.fcs = []
         for k, fc_dim in enumerate(fc_dims):
@@ -58,7 +58,10 @@ class Fast_RCNN_Conv_FC_Head(nn.Sequential):
             self.add_module("fc_relu{}".format(k + 1), ReLU())
             self.fcs.append(fc)
             self._output_size = fc_dim
-        
+            
+        for layer in self.fcs:
+            weight_init.c2_xavier_fill(layer)
+            
     def forward(self, x):
         for layer in self:
             x = layer(x)
@@ -90,7 +93,7 @@ class Fast_RCNN_Output_Layers(nn.Module):
             input_shape = ShapeSpec(channels=input_shape)
         elif isinstance(input_shape, list or tuple):
             input_shape = ShapeSpec(*input_shape)
-        self.ignore_value = kwargs['ignore_value']
+            
         self.num_classes = num_classes
         input_size = input_shape.channels*(input_shape.width or 1)*(input_shape.height or 1)
         self.cls_score = Linear(input_size, num_classes + 1)
@@ -141,7 +144,6 @@ class Fast_RCNN_Output_Layers(nn.Module):
         gt_classes = (
             cat([p.gt_classes for p in proposals], dim = 0) if len(proposals) else torch.empty(0)
         )
-        _log_classification_stats(scores, gt_classes)
         
         if len(proposals):
             proposal_boxes = cat([p.proposal_boxes.tensor for p in proposals], dim = 0)
@@ -156,8 +158,8 @@ class Fast_RCNN_Output_Layers(nn.Module):
         if self.use_sigmoid_ce:
             loss_cls = self.sigmoid_cross_entropy_loss(scores, gt_classes)
         else:
-            # loss_cls = cross_entropy(scores, gt_classes, reduction = "mean")    
-            loss_cls = F.cross_entropy(scores, gt_classes, ignore_index=self.ignore_value, reduction='mean')
+            loss_cls = cross_entropy(scores, gt_classes, reduction = "mean")    
+            # loss_cls = F.cross_entropy(scores, gt_classes, ignore_index=self.ignore_value, reduction='mean')
         losses = {
             "loss_cls": loss_cls,
             "loss_box_reg": self.box_reg_loss(
@@ -369,29 +371,8 @@ def fast_rcnn_inference_single_image(
     result.pred_classes = filter_inds[:, 1]
     return result, filter_inds[:, 0]
 
-def _log_classification_stats(pred_logits, 
-                              gt_classes,
-                              prefix = 'fast_rcnn'):
+
     
-    num_instances = gt_classes.numel()
-    if num_instances == 0:
-        return
-    pred_classes = pred_logits.argmax(dim=1)
-    bg_class_id = pred_logits.shape[1] - 1
-    fg_inds = (gt_classes >= 0) & (gt_classes < bg_class_id)
-    num_fg = fg_inds.nonzero().numel()
-    fg_gt_classes = gt_classes[fg_inds]
-    fg_pred_classes = pred_classes[fg_inds]
-    
-    num_false_negative = (fg_pred_classes == bg_class_id).nonzero().numel()
-    num_accurate = (pred_classes == gt_classes).nonzero().numel()
-    fg_num_accurate = (fg_pred_classes == fg_gt_classes).nonzero().numel()
-    
-    with EventStorage() as storage:
-        storage.put_scalar(f"{prefix}/cls_accuracy", num_accurate / num_instances)
-    
-        if num_fg > 0:
-            storage.put_scalar(f"{prefix}/fg_cls_accuracy", fg_num_accurate / num_fg)
-            storage.put_scalar(f"{prefix}/false_negative", num_false_negative / num_fg)
+
 
     

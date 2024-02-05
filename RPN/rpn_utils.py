@@ -9,14 +9,8 @@ import sys
 sys.path.append(r"E:\20231\DATN\Cityscapes-panoptic-segmentation")
 from structures import Boxes, Instances
 from layers import cat, batched_nms
+from layers.wrappers import move_device_like
 
-
-def move_device_like(src: torch.Tensor, dst: torch.Tensor) -> torch.Tensor:
-    """
-    Tracing friendly way to cast tensor to another tensor's device. Device will be treated
-    as constant during tracing, scripting the casting process as whole can workaround this issue.
-    """
-    return src.to(dst.device)
 
 class Anchor_Generator(nn.Module):
     def __init__(self, 

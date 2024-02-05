@@ -7,6 +7,7 @@ def get_optimizer_by_name(cfg, model):
     if cfg.name == 'Adam':
         return Adam(params = model.parameters(),
                     lr = cfg.base_lr,
+                    weight_decay=0.0001,
                     )
     elif cfg.name == 'AdamW':
         return AdamW(params = model.parameters(),
