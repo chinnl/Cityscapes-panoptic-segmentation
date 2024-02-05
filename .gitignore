@@ -22,3 +22,5 @@ _darcs
 test.py
 test.ipynb
 saver/
+
+*.yaml
