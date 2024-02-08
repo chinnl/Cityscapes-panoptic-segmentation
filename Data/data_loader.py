@@ -59,7 +59,7 @@ class Cityscapes(Dataset):
                 category_id = label.trainId
                 if category_id == 255: category_id = num_classes - 1
                     
-                if cv2.contourArea(polygon) != 0 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
+                if cv2.contourArea(polygon) >= 400 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
                     anno.append(
                         {
                             'segmentation': [polygon],
@@ -113,13 +113,13 @@ def build_dataloader(cfg):
     
     trainloader = DataLoader(cityscapes_train,
                             batch_size=cfg.train.batch_size,
-                            shuffle=False,
+                            shuffle=True,
                             drop_last=False,
                             num_workers=4,
                             collate_fn=trivial_batch_collator,
                             prefetch_factor = None,
                             persistent_workers = False,
-                            pin_memory = False
+                            pin_memory = True
                             )
     
     valloader = DataLoader(cityscapes_val,
@@ -129,7 +129,7 @@ def build_dataloader(cfg):
                             collate_fn=trivial_batch_collator,
                             prefetch_factor = None,
                             persistent_workers = False,
-                            pin_memory = False
+                            pin_memory = True
                             )
     
     return trainloader, valloader

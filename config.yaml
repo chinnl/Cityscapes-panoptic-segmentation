@@ -1,11 +1,11 @@
 data:
   train:
     folder: /home/chinnl/data/leftImg8bit/train
-    batch_size: 2
+    batch_size: 4
   
   val:
     folder: /home/chinnl/data/leftImg8bit/val
-    batch_size: 1
+    batch_size: 4
   
 
 model:
@@ -15,6 +15,7 @@ model:
     padding_constraint:
       square_size: 0
       size_divisibility: 0
+    checkpoint: /home/chinnl/Cityscapes-panoptic-segmentation/saver/panoptic_fpn_2/best.pt
 
   anchor_generator:
     anchor_sizes: [32,64,128,256,512] # One anchor size for each feature map level
@@ -25,9 +26,9 @@ model:
   rpn:
     batch_size_per_img: 256 # Total number of anchor boxes will be sampled
     positive_fraction: 0.5 # Number of positive boxes / number of negative boxes
-    pre_nms_topk: [8000, 1000] # Number of boxes for selecting before NMS [for train = 8000, for test = 1000]
+    pre_nms_topk: [2000, 1000] # Number of boxes for selecting before NMS [for train = 2000, for test = 1000]
     post_nms_topk: [1000, 1000] # Number of boxes for selecting after NMS [for train = 1000, for test = 500]
-    nms_thresh: 0.5 
+    nms_thresh: 0.5
     loss_weights: {'loss_rpn_cls': 0.5, 'loss_rpn_loc': 0.3}
     min_box_size: 0.0 
     box_reg_loss_type: smooth_l1
@@ -35,7 +36,7 @@ model:
     matcher:
       thresholds: [0.3, 0.7] # IoU(anchor box, gt box) < 0.3: label 0: background; IoU(anchor box, gt box) > 0.7: label 1: foreground; else: -1: ignored
       labels: [0, -1, 1]
-      allow_low_quality_matches: false
+      allow_low_quality_matches: True
 
   box_pooler:
     output_shape: 7
@@ -52,8 +53,8 @@ model:
 
   box_predictor:
     input_shape: 1024
-    test_score_thresh: 0.5
-    box_transform_weights: [10,10,5,5]
+    test_score_thresh: 0.05
+    box_transform_weights: [10, 10, 5, 5]
     cls_agnostic_bbox_reg: false
     box_reg_loss_type: smooth_l1
     smooth_l1_beta: 0
@@ -72,7 +73,7 @@ model:
     loss_weight: 1.0
 
   roi_heads:
-    batch_size_per_img: 256
+    batch_size_per_img: 512
     positive_fraction: 0.25
     matcher:
       thresholds: [0.5]
@@ -83,7 +84,7 @@ model:
     train_on_pred_boxes: false
   
   semantic_head:
-    loss_weight: 0.3
+    loss_weight: 0.5
 
   panoptic_head:
     combine_overlap_thresh: 0.8
@@ -91,14 +92,15 @@ model:
     combine_instances_score_thresh: 0.3
     
 config:
-  warmup_steps: 3
-  max_iters: 100
-  save_period: 20
+  warmup_steps: 50
+  step_per_epoch: 100
+  max_iters: 1000
+  save_period: 50
   optimizer: 
-    name: SGD
-    base_lr: 0.0025
+    name: Adam
+    base_lr: 0.00025
   scheduler: 
     name: StepLR
     lr_factor: 0.1
-    step: 10
-  save_dir: './saver/exp'
+    step: 100
+  save_dir: './saver/panoptic_fpn'
