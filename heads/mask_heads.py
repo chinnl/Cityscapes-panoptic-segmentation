@@ -127,6 +127,7 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
                  num_classes: int,
                  conv_dims: List[int],
                  conv_norm = "",
+                 use_dwise_conv = False,
                  **kwargs,
                  ):
         super().__init__(**kwargs)
@@ -140,13 +141,24 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
         self.conv_norm_relus = []
         cur_channels = input_shape.channels
         for k, conv_dim in enumerate(conv_dims[:-1]):
-            _conv = Conv2d(cur_channels,
-                            conv_dim,
-                            kernel_size=3,
-                            stride=1,
-                            padding=1,
-                            bias=not conv_norm,
-                            )
+            if use_dwise_conv:
+                _conv = Conv2d(cur_channels,
+                                conv_dim,
+                                kernel_size=3,
+                                stride=1,
+                                padding=1,
+                                bias=not conv_norm,
+                                groups=cur_channels
+                                )
+            else:
+                _conv = Conv2d(cur_channels,
+                                conv_dim,
+                                kernel_size=3,
+                                stride=1,
+                                padding=1,
+                                bias=not conv_norm,
+                                )
+                
             weight_init.c2_msra_fill(_conv)
             
             if conv_norm != '':

@@ -31,10 +31,10 @@ class R50(nn.Module):
         
         # output = [res5, res4, res3, res2]
         output = {
-            'res5': res5,
-            'res4': res4,
-            'res3': res3,
-            'res2': res2,
+            'P2': res2,
+            'P3': res3,
+            'P4': res4,
+            'P5': res5,
         }
         return output
     

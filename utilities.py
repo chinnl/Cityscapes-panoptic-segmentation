@@ -16,6 +16,8 @@ def get_optimizer_by_name(cfg, model):
     elif cfg.name == 'SGD':
         return SGD(params = model.parameters(),
                    lr = cfg.base_lr,
+                   momentum=0.9,
+                   weight_decay=0.0001
                    )
     else:
         raise ValueError("Invalid optimizer, expected Adam|AdamW|SGD but got {}".format(cfg.name))
