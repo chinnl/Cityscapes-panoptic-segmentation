@@ -11,7 +11,6 @@ from structures import Boxes, Instances
 from layers import cat, batched_nms
 from layers.wrappers import move_device_like
 
-
 class Anchor_Generator(nn.Module):
     def __init__(self, 
                  anchor_sizes: List[float], 
@@ -113,10 +112,10 @@ def find_top_rpn_proposal(
             objectness score in descending order.
     '''
     num_images = len(image_sizes)
-    # device = (
-    #     proposals[0].device()
-    # ) #Uncomment to ultilize GPU
-    device = torch.device('cpu')
+    device = (
+        proposals[0].device
+    ) #Uncomment to ultilize GPU
+    # device = torch.device('cpu')
     #Select topk anchor for every level and image
     
     topk_scores = [] #List of N element, each of shape (pre_nms_topk,)

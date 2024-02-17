@@ -65,7 +65,7 @@ class RFCN(ROI_Head):
             assert self.output_size[0] != self.output_size[1], 'ROIs must be square'
             self.output_size = output_size[0]
             
-        self.generate_score_maps = nn.Conv2d(256, output_size*output_size*(self.num_classes+1), kernel_size=(1,1), bias = False, groups = 256)
+        self.generate_score_maps = nn.Conv2d(256, output_size*output_size*(self.num_classes+1), kernel_size=(1,1), bias = False)
         self.generate_box_maps = nn.Conv2d(256, output_size*output_size*4, kernel_size=(1,1), bias = False)
         weight_init.c2_msra_fill(self.generate_score_maps)
         weight_init.c2_msra_fill(self.generate_box_maps)

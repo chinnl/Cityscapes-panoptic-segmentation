@@ -4,6 +4,11 @@ from typing import List, Dict
 from structures import ImageList
 from utils.postprocess import sem_seg_postprocess, detector_postprocess
 from .rcnn import GeneralizedRCNN
+from structures import BitMasks
+from Data.labels import trainId2label, labels
+
+_labels = [l for l in labels if l.hasInstances and not l.ignoreInEval]
+contiguous_id_to_dataset_trainId = {idx: l.trainId for idx, l in enumerate(_labels)}
 
 class PanopticFPN(GeneralizedRCNN):
     def __init__(self, 
@@ -97,12 +102,14 @@ def combine_semantic_and_instances_outputs(instance_results,
                                            stuff_area_thresh,
                                            instances_score_thresh):
     panoptic_seg = torch.zeros_like(semantic_results, dtype=torch.int32)
+    panoptic_img = torch.zeros((semantic_results.shape[0], semantic_results.shape[1], 3), dtype = torch.int32)
     sorted_inds = torch.argsort(-instance_results.scores)
     current_segment_id = 0
     segments_info = []
     
     instance_masks = instance_results.pred_masks.to(dtype = torch.bool, device = panoptic_seg.device)
-    
+    instance_boxes = instance_results.pred_boxes.tensor.detach().cpu()
+
     for instance_id in sorted_inds:
         score = instance_results.scores[instance_id].item()
         if score < instances_score_thresh:
@@ -124,20 +131,31 @@ def combine_semantic_and_instances_outputs(instance_results,
         
         current_segment_id += 1
         panoptic_seg[mask] = current_segment_id
+        cat_id = contiguous_id_to_dataset_trainId[instance_results.pred_classes[instance_id].item()]
+        
+        _instance_id = trainId2label[cat_id].id*1000 + current_segment_id
+        color = [_instance_id % 256, _instance_id // 256, _instance_id // 256 // 256]
+
+        panoptic_img[:, :, 0][mask]= color[0]
+        panoptic_img[:, :, 1][mask]= color[1]
+        panoptic_img[:, :, 2][mask]= color[2]
         
         segments_info.append(
             {
-                "id": current_segment_id,
-                "isthing": True,
-                "score": score,
-                "category_id": instance_results.pred_classes[instance_id].item(),
-                "instance_id": instance_id.item(),
+                "id": _instance_id,
+                # "isthing": True,
+                # "score": score,
+                "category_id": cat_id,
+                # "instance_id": instance_id.item(),
+                "area": mask_area,
+                'bbox': instance_boxes[instance_id].to(torch.int32).tolist(),
+                "iscrowd": 0
             }
         )
     semantic_labels = torch.unique(semantic_results).cpu().tolist()
     
     for semantic_label in semantic_labels:
-        if semantic_label == 0:
+        if semantic_label == 19:
             continue
         mask = (semantic_results == semantic_label) & (panoptic_seg == 0)
         mask_area = mask.sum().item()
@@ -145,12 +163,22 @@ def combine_semantic_and_instances_outputs(instance_results,
             continue
         current_segment_id +=1
         panoptic_seg[mask] = current_segment_id
+
+        color = [current_segment_id % 256, current_segment_id // 256, current_segment_id // 256 // 256]
+        panoptic_img[:, :, 0][mask]= color[0]
+        panoptic_img[:, :, 1][mask]= color[1]
+        panoptic_img[:, :, 2][mask]= color[2]
+        
+        bitmask = BitMasks(mask.unsqueeze(0))
+        box = bitmask.get_bounding_boxes().tensor.squeeze().to(torch.int32).tolist()
         segments_info.append(
             {
                 "id": current_segment_id,
-                'isthing': False,
+                # 'isthing': False,
+                "iscrowd": 0,
                 'category_id': semantic_label,
                 'area': mask_area,
+                'bbox': box
             }
         )
-    return panoptic_seg, segments_info
+    return panoptic_seg, segments_info, panoptic_img

@@ -8,8 +8,9 @@ from layers import ShapeSpec, get_norm, cat, batched_nms
 from layers.wrappers import nonzero_tuple
 from RPN.box_regression import _dense_box_regression_loss
 from structures import Instances, Boxes
-from layers.wrappers import cross_entropy
+from layers.wrappers import cross_entropy, focal_loss
 from fvcore.nn import weight_init
+from torchvision.ops import nms
 
 class Fast_RCNN_Conv_FC_Head(nn.Sequential):
     def __init__(self,
@@ -66,6 +67,64 @@ class Fast_RCNN_Conv_FC_Head(nn.Sequential):
         for layer in self:
             x = layer(x)
         return x
+
+class Fast_RCNN_Conv_AP_Head(nn.Sequential):
+    def __init__(self,
+                 input_shape: Union[ShapeSpec, Tuple, int],
+                 *,
+                 conv_dims: List[int],
+                 fc_dims: List[int],
+                 conv_norm = ""):
+        super().__init__()
+        assert len(conv_dims) + len(fc_dims) > 0
+        
+        if isinstance(input_shape, list or tuple):
+            input_shape = ShapeSpec(*input_shape)
+        elif isinstance(input_shape, int):
+            input_shape = ShapeSpec(channels=input_shape)
+            
+        self._output_size = (input_shape.channels, input_shape.height, input_shape.width)
+        self.conv_norm_relus = []
+        
+        for k, conv_dim in enumerate(conv_dims):
+            _conv = Conv2d(self._output_size[0],
+                       conv_dim,
+                       kernel_size=3,
+                       padding=1,
+                       bias=not conv_norm)
+            
+            weight_init.c2_msra_fill(_conv)
+            
+            conv = nn.Sequential(
+                _conv,
+                get_norm(conv_norm, conv_dim),
+                nn.LeakyReLU(),
+                ) if conv_norm != "" else nn.Sequential(
+                    _conv,
+                    nn.LeakyReLU(),)
+            self.add_module("conv{}".format(k + 1), conv)
+            self.conv_norm_relus.append(conv)
+            self._output_size = (conv_dim, self._output_size[1], self._output_size[2])        
+        
+        # self.fcs = []
+        for k, fc_dim in enumerate(fc_dims):
+            if k == 0:
+                self.add_module("flatten", Flatten())
+            # fc = Linear(int(np.prod(self._output_size)), fc_dim)
+            avg_pool = nn.AdaptiveAvgPool1d(fc_dim)
+            self.add_module("avg_pool{}".format(k + 1), avg_pool)
+            self.add_module("avg_pool_relu{}".format(k + 1), nn.LeakyReLU())
+            # self.fcs.append(fc)
+            # self._output_size = fc_dim
+            
+        # for layer in self.fcs:
+        #     weight_init.c2_xavier_fill(layer)
+            
+    def forward(self, x):
+        for layer in self:
+            x = layer(x)
+        return x
+
 
 class Fast_RCNN_Output_Layers(nn.Module):
     def __init__(self,
@@ -158,7 +217,8 @@ class Fast_RCNN_Output_Layers(nn.Module):
         if self.use_sigmoid_ce:
             loss_cls = self.sigmoid_cross_entropy_loss(scores, gt_classes)
         else:
-            loss_cls = cross_entropy(scores, gt_classes, reduction = "mean")    
+            loss_cls = focal_loss(scores, gt_classes, reduction = "mean")    
+            # loss_cls = cross_entropy(scores, gt_classes, reduction = "mean")    
             # loss_cls = F.cross_entropy(scores, gt_classes, ignore_index=self.ignore_value, reduction='mean')
         losses = {
             "loss_cls": loss_cls,

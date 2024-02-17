@@ -20,7 +20,7 @@ class Dataset_mapper:
                                                                 # and keep the top k proposals for each image.
                  recompute_boxes: bool = False, #whether to overwrite bounding box annotations
                                                 # by computing tight bounding boxes from instance mask annotations.
-                 label_mapping: Dict[int, int] #whether to map 255 to nc-1 (ignored value)
+                 label_mapping: Dict[int, int] = None #whether to map 255 to nc-1 (ignored value)
                  ):
         if recompute_boxes:
             assert use_instance_mask, "Recompute boxes require instance masks!"
@@ -54,12 +54,10 @@ class Dataset_mapper:
         else:
             sem_seg_gt = None
         
-        if self.augmentations is not None:
-            aug_input = AugInput(image, sem_seg= sem_seg_gt)
-            transforms = self.augmentations(aug_input)
-            image, sem_seg_gt = aug_input.image, aug_input.sem_seg
-        else:
-            transforms = None
+        aug_input = AugInput(image, sem_seg= sem_seg_gt)
+        transforms = self.augmentations(aug_input)
+        image, sem_seg_gt = aug_input.image, aug_input.sem_seg
+       
         
         image_shape = image.shape[:2]
         
@@ -77,7 +75,7 @@ class Dataset_mapper:
             dataset_dict.pop("sem_seg_file_name", None)
             return dataset_dict
         
-        if "annotations" in dataset_dict and transforms is not None:
+        if "annotations" in dataset_dict:
             self._transform_annotations(dataset_dict, transforms, image_shape)
         return dataset_dict
 
@@ -95,7 +93,7 @@ class Dataset_mapper:
             annos, image_shape, mask_format = self.instance_mask_format
         )
         
-        if self.recompute_boxes:
+        if self.recompute_boxes and len(annos):
             instances.gt_boxes = instances.gt_masks.get_bounding_boxes()
         dataset_dict['instances'] = filter_empty_instances(instances)
     

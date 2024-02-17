@@ -43,6 +43,7 @@ class SemSeg_FPN_Head(nn.Module):
                         stride=1,
                         padding=1,
                         bias=not norm,
+                        groups = conv_dims
                         )
                 
                 weight_init.c2_msra_fill(conv_)
@@ -51,11 +52,11 @@ class SemSeg_FPN_Head(nn.Module):
                     conv = nn.Sequential(
                         conv_,
                         norm_module,
-                        nn.ReLU(),)
+                        nn.LeakyReLU(),)
                 else:
                     conv = nn.Sequential(
                         conv_,
-                        nn.ReLU(),)
+                        nn.LeakyReLU(),)
                     
                 
                 head_ops.append(conv)

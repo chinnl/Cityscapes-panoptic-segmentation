@@ -26,11 +26,16 @@ class RPN_Head(nn.Module):
     def __init__(self, box_dims, num_cell_anchors, in_channels = 256) -> None:
         super(RPN_Head, self).__init__()
         
-        self.conv = nn.Conv2d(in_channels, in_channels, kernel_size = 3, bias = True, padding = 1)
+        self.conv = nn.Conv2d(in_channels, in_channels, kernel_size = 3, bias = True, padding = 1, groups = in_channels)
         # self.norm1 = nn.BatchNorm2d(in_channels)
-        self.objness_logit_conv = nn.Conv2d(in_channels, num_cell_anchors, kernel_size = 1, bias = False)
+        self.objness_logit_conv = nn.Sequential(
+                                        nn.Conv2d(in_channels, num_cell_anchors, kernel_size = 1, bias = False),
+                                        nn.LeakyReLU() )
 
-        self.anchor_delta_conv = nn.Conv2d(in_channels, box_dims*num_cell_anchors, kernel_size = 1, bias = False)
+        self.anchor_delta_conv = nn.Sequential(
+                                        nn.Conv2d(in_channels, box_dims*num_cell_anchors, kernel_size = 1, bias = False),
+                                        nn.LeakyReLU() )
+        
         # weight_init.c2_msra_fill(self.conv)
         # weight_init.c2_msra_fill(self.objness_logit_conv)
         # weight_init.c2_msra_fill(self.anchor_delta_conv)
@@ -55,7 +60,6 @@ class RPN_Head(nn.Module):
         objectness_logits = []
         for feature in features:
             obj_logit = self.objness_logit_conv(feature)
-            obj_logit = nn.ReLU()(obj_logit)
             objectness_logits.append(obj_logit)
         return objectness_logits
     
@@ -63,7 +67,6 @@ class RPN_Head(nn.Module):
         pred_anchor_deltas = []
         for feature in features:
             feature = self.anchor_delta_conv(feature)
-            feature = nn.ReLU()(feature)
             pred_anchor_deltas.append(feature)
         return pred_anchor_deltas
 

@@ -1,4 +1,4 @@
-from model_from_config import load_model, load_panoptic_rfcn_model
+from model_from_config import *
 from Data.data_loader import build_dataloader
 import anyconfig, munch
 import os
@@ -15,7 +15,7 @@ config = anyconfig.load(config_path)
 config = munch.munchify(config)   
 
 max_iters = config.config.max_iters
-model = load_model(config.model)
+model = load_efficient_model(config.model)
 if config.model.general.checkpoint is not None:
     model.load_state_dict(torch.load(config.model.general.checkpoint))
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -26,14 +26,23 @@ base_lr = config.config.optimizer.base_lr
 warmup_steps = config.config.warmup_steps
 
 def warmup_scheduler(current_step: int):
-    if current_step < warmup_steps:  # current_step / warmup_steps * base_lr
-        return float(current_step/ warmup_steps)
-    else:                                 # (num_training_steps - current_step) / (num_training_steps - warmup_steps) * base_lr
+    if current_step < warmup_steps: 
+        return base_lr*(current_step/ warmup_steps)
+    else:                                
         return base_lr*max_iters*(1+math.cos(math.pi*current_step/max_iters))/2
     
 optim = get_optimizer_by_name(config.config.optimizer, model)
 # scheduler = get_scheduler_by_name(config.config.scheduler, optimizer=optim, max_iters=max_iters)
 scheduler = LambdaLR(optim, lr_lambda=warmup_scheduler)
+if config.config.resume > 0:
+    assert config.config.resume < config.config.max_iters
+    current_step = config.config.resume 
+    for _ in range(current_step):
+        scheduler.step()
+    print("........Resume training from epoch {}, lr {:.6f}".format(current_step, scheduler.get_last_lr()[-1]))
+else:
+    current_step = 0
+
 trainloader, valloader = build_dataloader(config.data)
 print("Load data: Done")
 
@@ -53,10 +62,11 @@ val_losses = {  'iters': [],
                 'loss_cls': [],
                 'loss_box_reg': [],
                 'loss_mask': []}
-
-best_val_loss = 1.2736 
+ 
+best_val_loss = 1.2942 
 if config.config.step_per_epoch < 1: config.config.step_per_epoch = len(trainloader)
-for epoch in range(1, max_iters+1):
+
+for epoch in range(current_step, max_iters+1):
     model.train()
     epoch_train_losses = {'loss_sem_seg': 0,
                             'loss_rpn_cls': 0,

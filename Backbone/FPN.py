@@ -6,19 +6,22 @@ from fvcore.nn import weight_init
 C = 256
 class FPN(nn.Module):
     def __init__(self, 
-                 dummy_input:Dict #Dummy input for initialization
-                 ):
+                 dummy_input:Dict, #Dummy input for initialization
+                 use_dwise_conv: bool = False):
         super(FPN, self).__init__()
-
+        
+        if use_dwise_conv: groups = C
+        else: groups = 1 
+        
         self.in_channels = [feature.shape[1] for _, feature in dummy_input.items()]
         self.lat_conv2 = nn.Conv2d(self.in_channels[0], C, kernel_size = 1, stride = 1, bias = True) 
         self.lat_conv3 = nn.Conv2d(self.in_channels[1], C, kernel_size = 1, stride = 1, bias = True)
         self.lat_conv4 = nn.Conv2d(self.in_channels[2], C, kernel_size = 1, stride = 1, bias = True)
         self.lat_conv5 = nn.Conv2d(self.in_channels[3], C, kernel_size = 1, stride = 1, bias = True)
-        self.output_conv2 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
-        self.output_conv3 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
-        self.output_conv4 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
-        self.output_conv5 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1)
+        self.output_conv2 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1, groups = groups)
+        self.output_conv3 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1, groups = groups)
+        self.output_conv4 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1, groups = groups)
+        self.output_conv5 = nn.Conv2d(C, C, kernel_size = 3, stride = 1, bias = True, padding = 1, groups = groups)
         
         # for layer in self.children():
         #     weight_init.c2_msra_fill(layer)

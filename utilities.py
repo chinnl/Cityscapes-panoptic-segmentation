@@ -2,6 +2,7 @@ from torch.optim import Adam, AdamW, SGD
 from torch.optim.lr_scheduler import StepLR, PolynomialLR, ReduceLROnPlateau
 import os, re, glob
 import matplotlib.pyplot as plt
+import json
 
 def get_optimizer_by_name(cfg, model):
     if cfg.name == 'Adam':
@@ -81,3 +82,9 @@ def plot_results(training_result, fpath):
         ax.set_title(col_name)
     fig.tight_layout()
     fig.savefig(fpath)
+    
+    
+def writeDict2JSON(dictName, fileName):
+    """Write a dictionary as json file"""
+    with open(fileName, 'w') as f:
+        f.write(json.dumps(dictName, default=lambda o: o.__dict__, sort_keys=True, indent=4))

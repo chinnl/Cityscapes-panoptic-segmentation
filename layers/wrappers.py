@@ -160,3 +160,17 @@ def move_device_like(src: torch.Tensor, dst: torch.Tensor) -> torch.Tensor:
     as constant during tracing, scripting the casting process as whole can workaround this issue.
     """
     return src.to(dst.device)
+
+
+def focal_loss(inputs, targets, weights = None, gamma = 2, reduction = 'mean'):
+    ce_loss = F.cross_entropy(inputs, targets, reduction='none',weight=weights)
+    pt = torch.exp(-ce_loss)
+    
+    if reduction == 'mean':
+        focal_loss = ((1 - pt) ** gamma * ce_loss).mean()
+    elif reduction == 'sum':
+        focal_loss = ((1 - pt) ** gamma * ce_loss).sum()
+    else:
+        focal_loss = ((1 - pt) ** gamma * ce_loss)
+        
+    return focal_loss

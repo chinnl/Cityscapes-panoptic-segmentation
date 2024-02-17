@@ -148,7 +148,7 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
                                 stride=1,
                                 padding=1,
                                 bias=not conv_norm,
-                                groups=cur_channels
+                                groups=conv_dim
                                 )
             else:
                 _conv = Conv2d(cur_channels,
@@ -165,21 +165,21 @@ class Mask_RCNN_Conv_Upsample_Head(Base_Mask_RCNN_Head, nn.Sequential):
                 conv = nn.Sequential(
                     _conv,
                     get_norm(conv_norm, conv_dims),
-                    ReLU(),
+                    nn.LeakyReLU(),
                     )
             else:
                 conv = nn.Sequential(
                     _conv,
-                    ReLU(),
+                    nn.LeakyReLU(),
                     )
             self.add_module("mask_fcn{}".format(k + 1), conv)
             self.conv_norm_relus.append(conv)
             cur_channels = conv_dim
         
         self.deconv = ConvTranspose2d(
-            cur_channels, conv_dims[-1], kernel_size=2, stride=2, padding=0
+            cur_channels, conv_dims[-1], kernel_size=2, stride=2, padding=0, groups =  conv_dims[-1]
         )
-        self.add_module("deconv_relu", ReLU())
+        self.add_module("deconv_relu", nn.LeakyReLU())
         cur_channels = conv_dims[-1]
         
         self.predictor = Conv2d(cur_channels, num_classes, kernel_size=1, stride=1, padding=0)

@@ -30,35 +30,43 @@ class Cityscapes(Dataset):
                             precomputed_proposal_topk=None,
                             recompute_boxes=True,
                             label_mapping={255: num_classes - 1})
+                            
         self.file_name = []
         self.sem_seg_file_name = []
         self.annotations = []
-        
+        _labels = [l for l in labels if l.hasInstances and not l.ignoreInEval]
+        dataset_trainId_to_contiguous_id = {l.trainId: idx for idx, l in enumerate(_labels)}
         
         for idx in range(len(self.image_list)):
             file_name = self.image_list[idx].split("/")[-1].replace("_leftImg8bit.png", "")
             city_name = file_name.split("_")[0]
             annotation = read_json_file(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_polygons.json"))
-            
-            self.file_name.append(self.image_list[idx])
-            self.sem_seg_file_name.append(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_labelTrainIds.png"))
 
             anno = []
             
             for obj_dict in annotation['objects']:
+                if "deleted" in obj_dict:  # cityscapes data format specific
+                    continue
                 iscrowd = int(obj_dict['label'].endswith('group'))
-                
-                polygon = np.array(obj_dict['polygon'])
-                bbox = [np.min(polygon[:, 0]), np.min(polygon[:, 1]), np.max(polygon[:, 0]), np.max(polygon[:, 1])]
                 
                 try: 
                     label = name2label[obj_dict['label']]
                 except:
                     label = name2label[obj_dict['label'].replace("group", "")]
+                    
+                if label.id < 0:  # cityscapes data format
+                    continue
                 
                 category_id = label.trainId
-                if category_id == 255: category_id = num_classes - 1
-                    
+                # if category_id == 255: category_id = num_classes - 1
+                if not label.hasInstances or label.ignoreInEval:
+                    continue
+                
+                category_id = dataset_trainId_to_contiguous_id[category_id]
+                
+                polygon = np.array(obj_dict['polygon'])
+                bbox = [np.min(polygon[:, 0]), np.min(polygon[:, 1]), np.max(polygon[:, 0]), np.max(polygon[:, 1])]
+                
                 if cv2.contourArea(polygon) >= 400 and (bbox[2] - bbox[0])*(bbox[3] - bbox[1]) != 0:
                     anno.append(
                         {
@@ -69,17 +77,24 @@ class Cityscapes(Dataset):
                             'category_id': category_id,
                         }
                     )
-            self.annotations.append(anno)
-            
+            if len(anno):
+                self.annotations.append(anno)
+                self.file_name.append(self.image_list[idx])
+                self.sem_seg_file_name.append(os.path.join(gt_dir, city_name + "/" + file_name + "_gtFine_labelTrainIds.png"))
+
     def __len__(self):
-        return len(self.image_list)
+        return len(self.annotations)
     
     def __getitem__(self, idx):
-        return self.data_mapper({
+        data_dict = {
             'file_name': self.file_name[idx],
             'sem_seg_file_name': self.sem_seg_file_name[idx],
             'annotations': self.annotations[idx]
-        })
+        } if len(self.annotations[idx]) else {
+            'file_name': self.file_name[idx],
+            'sem_seg_file_name': self.sem_seg_file_name[idx],
+        }
+        return self.data_mapper(data_dict)
     
     
 def build_dataloader(cfg):
