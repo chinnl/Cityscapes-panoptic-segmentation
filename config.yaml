@@ -5,20 +5,21 @@ data:
   
   val:
     folder: /home/chinnl/data/leftImg8bit/val
-    batch_size: 4
+    batch_size: 1
   
 
 model:
   general:
-    num_classes: 25
+    num_classes: 20
+    num_thing_classes: 8
     input_shape: [512,1024]
     padding_constraint:
       square_size: 0
       size_divisibility: 0
-    checkpoint: /home/chinnl/Cityscapes-panoptic-segmentation/saver/panoptic_fpn_2/best.pt
+    checkpoint: /home/chinnl/Cityscapes-panoptic-segmentation/saver2/efficient_panoptic_fpn/best.pt
 
   anchor_generator:
-    anchor_sizes: [32,64,128,256,512] # One anchor size for each feature map level
+    anchor_sizes: [64,64,128,256,256] # One anchor size for each feature map level
     anchor_ratios: [0.5, 1.0, 2.0] # All 3 anchor ratios for each feature map level
     # anchor_ratios: [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
     anchor_strides: [4,8,16,32,64] # One anchor stride for each feature map level
@@ -29,7 +30,7 @@ model:
     pre_nms_topk: [2000, 1000] # Number of boxes for selecting before NMS [for train = 2000, for test = 1000]
     post_nms_topk: [1000, 1000] # Number of boxes for selecting after NMS [for train = 1000, for test = 500]
     nms_thresh: 0.5
-    loss_weights: {'loss_rpn_cls': 0.5, 'loss_rpn_loc': 0.3}
+    loss_weights: {'loss_rpn_cls': 0.3, 'loss_rpn_loc': 0.5}
     min_box_size: 0.0 
     box_reg_loss_type: smooth_l1
     box_transform_weights: [1.0, 1.0, 1.0, 1.0]
@@ -84,7 +85,7 @@ model:
     train_on_pred_boxes: false
   
   semantic_head:
-    loss_weight: 0.5
+    loss_weight: 1.0
 
   panoptic_head:
     combine_overlap_thresh: 0.8
@@ -98,9 +99,10 @@ config:
   save_period: 50
   optimizer: 
     name: Adam
-    base_lr: 0.00025
+    base_lr: 0.0001
   scheduler: 
     name: StepLR
     lr_factor: 0.1
     step: 100
-  save_dir: './saver/panoptic_fpn'
+  save_dir: './saver2/efficient_panoptic_fpn'
+  resume: 0 

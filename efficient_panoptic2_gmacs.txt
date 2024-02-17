@@ -1,0 +1,734 @@
+PanopticFPN(
+  9.34 M, 100.000% Params, 11.6 GMac, 98.815% MACs, 
+  (backbone): Backbone(
+    9.26 M, 99.147% Params, 10.49 GMac, 89.391% MACs, 
+    (bottom_up): EfficientNet(
+      8.8 M, 94.236% Params, 9.76 GMac, 83.165% MACs, 
+      (features): Sequential(
+        8.8 M, 94.236% Params, 9.76 GMac, 83.165% MACs, 
+        (0): CNNBlock(
+          1.1 k, 0.012% Params, 144.44 MMac, 1.231% MACs, 
+          (cnn): Conv2d(1.03 k, 0.011% Params, 134.48 MMac, 1.146% MACs, 3, 38, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(76, 0.001% Params, 9.96 MMac, 0.085% MACs, 38, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+        )
+        (1): Sequential(
+          1.88 k, 0.020% Params, 246.15 MMac, 2.097% MACs, 
+          (0): MBConv(
+            1.22 k, 0.013% Params, 159.65 MMac, 1.360% MACs, 
+            (block): Sequential(
+              1.22 k, 0.013% Params, 159.65 MMac, 1.360% MACs, 
+              (0): CNNBlock(
+                418, 0.004% Params, 54.79 MMac, 0.467% MACs, 
+                (cnn): Conv2d(342, 0.004% Params, 44.83 MMac, 0.382% MACs, 38, 38, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=38, bias=False)
+                (bn): BatchNorm2d(76, 0.001% Params, 9.96 MMac, 0.085% MACs, 38, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): Conv2d(760, 0.008% Params, 99.61 MMac, 0.849% MACs, 38, 20, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (2): BatchNorm2d(40, 0.000% Params, 5.24 MMac, 0.045% MACs, 20, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.0, mode=row)
+          )
+          (1): MBConv(
+            660, 0.007% Params, 86.51 MMac, 0.737% MACs, 
+            (block): Sequential(
+              660, 0.007% Params, 86.51 MMac, 0.737% MACs, 
+              (0): CNNBlock(
+                220, 0.002% Params, 28.84 MMac, 0.246% MACs, 
+                (cnn): Conv2d(180, 0.002% Params, 23.59 MMac, 0.201% MACs, 20, 20, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=20, bias=False)
+                (bn): BatchNorm2d(40, 0.000% Params, 5.24 MMac, 0.045% MACs, 20, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): Conv2d(400, 0.004% Params, 52.43 MMac, 0.447% MACs, 20, 20, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (2): BatchNorm2d(40, 0.000% Params, 5.24 MMac, 0.045% MACs, 20, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.0125, mode=row)
+          )
+        )
+        (2): Sequential(
+          30.67 k, 0.328% Params, 1.26 GMac, 10.776% MACs, 
+          (0): MBConv(
+            7.38 k, 0.079% Params, 501.22 MMac, 4.271% MACs, 
+            (block): Sequential(
+              7.38 k, 0.079% Params, 501.22 MMac, 4.271% MACs, 
+              (0): CNNBlock(
+                2.64 k, 0.028% Params, 346.03 MMac, 2.949% MACs, 
+                (cnn): Conv2d(2.4 k, 0.026% Params, 314.57 MMac, 2.681% MACs, 20, 120, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(240, 0.003% Params, 31.46 MMac, 0.268% MACs, 120, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                1.32 k, 0.014% Params, 43.25 MMac, 0.369% MACs, 
+                (cnn): Conv2d(1.08 k, 0.012% Params, 35.39 MMac, 0.302% MACs, 120, 120, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), groups=120, bias=False)
+                (bn): BatchNorm2d(240, 0.003% Params, 7.86 MMac, 0.067% MACs, 120, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(3.36 k, 0.036% Params, 110.1 MMac, 0.938% MACs, 120, 28, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(56, 0.001% Params, 1.84 MMac, 0.016% MACs, 28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.025, mode=row)
+          )
+          (1): MBConv(
+            11.65 k, 0.125% Params, 381.68 MMac, 3.252% MACs, 
+            (block): Sequential(
+              11.65 k, 0.125% Params, 381.68 MMac, 3.252% MACs, 
+              (0): CNNBlock(
+                5.04 k, 0.054% Params, 165.15 MMac, 1.407% MACs, 
+                (cnn): Conv2d(4.7 k, 0.050% Params, 154.14 MMac, 1.313% MACs, 28, 168, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(336, 0.004% Params, 11.01 MMac, 0.094% MACs, 168, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                1.85 k, 0.020% Params, 60.56 MMac, 0.516% MACs, 
+                (cnn): Conv2d(1.51 k, 0.016% Params, 49.55 MMac, 0.422% MACs, 168, 168, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=168, bias=False)
+                (bn): BatchNorm2d(336, 0.004% Params, 11.01 MMac, 0.094% MACs, 168, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(4.7 k, 0.050% Params, 154.14 MMac, 1.313% MACs, 168, 28, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(56, 0.001% Params, 1.84 MMac, 0.016% MACs, 28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.037500000000000006, mode=row)
+          )
+          (2): MBConv(
+            11.65 k, 0.125% Params, 381.68 MMac, 3.252% MACs, 
+            (block): Sequential(
+              11.65 k, 0.125% Params, 381.68 MMac, 3.252% MACs, 
+              (0): CNNBlock(
+                5.04 k, 0.054% Params, 165.15 MMac, 1.407% MACs, 
+                (cnn): Conv2d(4.7 k, 0.050% Params, 154.14 MMac, 1.313% MACs, 28, 168, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(336, 0.004% Params, 11.01 MMac, 0.094% MACs, 168, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                1.85 k, 0.020% Params, 60.56 MMac, 0.516% MACs, 
+                (cnn): Conv2d(1.51 k, 0.016% Params, 49.55 MMac, 0.422% MACs, 168, 168, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=168, bias=False)
+                (bn): BatchNorm2d(336, 0.004% Params, 11.01 MMac, 0.094% MACs, 168, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(4.7 k, 0.050% Params, 154.14 MMac, 1.313% MACs, 168, 28, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(56, 0.001% Params, 1.84 MMac, 0.016% MACs, 28, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.05, mode=row)
+          )
+        )
+        (3): Sequential(
+          89.93 k, 0.963% Params, 860.55 MMac, 7.333% MACs, 
+          (0): MBConv(
+            17.74 k, 0.190% Params, 269.16 MMac, 2.294% MACs, 
+            (block): Sequential(
+              17.74 k, 0.190% Params, 269.16 MMac, 2.294% MACs, 
+              (0): CNNBlock(
+                5.04 k, 0.054% Params, 165.15 MMac, 1.407% MACs, 
+                (cnn): Conv2d(4.7 k, 0.050% Params, 154.14 MMac, 1.313% MACs, 28, 168, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(336, 0.004% Params, 11.01 MMac, 0.094% MACs, 168, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                4.54 k, 0.049% Params, 37.16 MMac, 0.317% MACs, 
+                (cnn): Conv2d(4.2 k, 0.045% Params, 34.41 MMac, 0.293% MACs, 168, 168, kernel_size=(5, 5), stride=(2, 2), padding=(2, 2), groups=168, bias=False)
+                (bn): BatchNorm2d(336, 0.004% Params, 2.75 MMac, 0.023% MACs, 168, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(8.06 k, 0.086% Params, 66.06 MMac, 0.563% MACs, 168, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(96, 0.001% Params, 786.43 KMac, 0.007% MACs, 48, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.0625, mode=row)
+          )
+          (1): MBConv(
+            36.1 k, 0.386% Params, 295.7 MMac, 2.520% MACs, 
+            (block): Sequential(
+              36.1 k, 0.386% Params, 295.7 MMac, 2.520% MACs, 
+              (0): CNNBlock(
+                14.4 k, 0.154% Params, 117.96 MMac, 1.005% MACs, 
+                (cnn): Conv2d(13.82 k, 0.148% Params, 113.25 MMac, 0.965% MACs, 48, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(576, 0.006% Params, 4.72 MMac, 0.040% MACs, 288, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                7.78 k, 0.083% Params, 63.7 MMac, 0.543% MACs, 
+                (cnn): Conv2d(7.2 k, 0.077% Params, 58.98 MMac, 0.503% MACs, 288, 288, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=288, bias=False)
+                (bn): BatchNorm2d(576, 0.006% Params, 4.72 MMac, 0.040% MACs, 288, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(13.82 k, 0.148% Params, 113.25 MMac, 0.965% MACs, 288, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(96, 0.001% Params, 786.43 KMac, 0.007% MACs, 48, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.07500000000000001, mode=row)
+          )
+          (2): MBConv(
+            36.1 k, 0.386% Params, 295.7 MMac, 2.520% MACs, 
+            (block): Sequential(
+              36.1 k, 0.386% Params, 295.7 MMac, 2.520% MACs, 
+              (0): CNNBlock(
+                14.4 k, 0.154% Params, 117.96 MMac, 1.005% MACs, 
+                (cnn): Conv2d(13.82 k, 0.148% Params, 113.25 MMac, 0.965% MACs, 48, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(576, 0.006% Params, 4.72 MMac, 0.040% MACs, 288, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                7.78 k, 0.083% Params, 63.7 MMac, 0.543% MACs, 
+                (cnn): Conv2d(7.2 k, 0.077% Params, 58.98 MMac, 0.503% MACs, 288, 288, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=288, bias=False)
+                (bn): BatchNorm2d(576, 0.006% Params, 4.72 MMac, 0.040% MACs, 288, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(13.82 k, 0.148% Params, 113.25 MMac, 0.965% MACs, 288, 48, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(96, 0.001% Params, 786.43 KMac, 0.007% MACs, 48, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.08750000000000001, mode=row)
+          )
+        )
+        (4): Sequential(
+          518.5 k, 5.550% Params, 1.15 GMac, 9.802% MACs, 
+          (0): MBConv(
+            45.41 k, 0.486% Params, 181.47 MMac, 1.546% MACs, 
+            (block): Sequential(
+              45.41 k, 0.486% Params, 181.47 MMac, 1.546% MACs, 
+              (0): CNNBlock(
+                14.4 k, 0.154% Params, 117.96 MMac, 1.005% MACs, 
+                (cnn): Conv2d(13.82 k, 0.148% Params, 113.25 MMac, 0.965% MACs, 48, 288, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(576, 0.006% Params, 4.72 MMac, 0.040% MACs, 288, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                3.17 k, 0.034% Params, 6.49 MMac, 0.055% MACs, 
+                (cnn): Conv2d(2.59 k, 0.028% Params, 5.31 MMac, 0.045% MACs, 288, 288, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), groups=288, bias=False)
+                (bn): BatchNorm2d(576, 0.006% Params, 1.18 MMac, 0.010% MACs, 288, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(27.65 k, 0.296% Params, 56.62 MMac, 0.482% MACs, 288, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(192, 0.002% Params, 393.22 KMac, 0.003% MACs, 96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.1, mode=row)
+          )
+          (1): MBConv(
+            118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+            (block): Sequential(
+              118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+              (0): CNNBlock(
+                56.45 k, 0.604% Params, 115.61 MMac, 0.985% MACs, 
+                (cnn): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 96, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                6.34 k, 0.068% Params, 12.98 MMac, 0.111% MACs, 
+                (cnn): Conv2d(5.18 k, 0.055% Params, 10.62 MMac, 0.090% MACs, 576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 576, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(192, 0.002% Params, 393.22 KMac, 0.003% MACs, 96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.1125, mode=row)
+          )
+          (2): MBConv(
+            118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+            (block): Sequential(
+              118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+              (0): CNNBlock(
+                56.45 k, 0.604% Params, 115.61 MMac, 0.985% MACs, 
+                (cnn): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 96, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                6.34 k, 0.068% Params, 12.98 MMac, 0.111% MACs, 
+                (cnn): Conv2d(5.18 k, 0.055% Params, 10.62 MMac, 0.090% MACs, 576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 576, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(192, 0.002% Params, 393.22 KMac, 0.003% MACs, 96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.125, mode=row)
+          )
+          (3): MBConv(
+            118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+            (block): Sequential(
+              118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+              (0): CNNBlock(
+                56.45 k, 0.604% Params, 115.61 MMac, 0.985% MACs, 
+                (cnn): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 96, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                6.34 k, 0.068% Params, 12.98 MMac, 0.111% MACs, 
+                (cnn): Conv2d(5.18 k, 0.055% Params, 10.62 MMac, 0.090% MACs, 576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 576, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(192, 0.002% Params, 393.22 KMac, 0.003% MACs, 96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.1375, mode=row)
+          )
+          (4): MBConv(
+            118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+            (block): Sequential(
+              118.27 k, 1.266% Params, 242.22 MMac, 2.064% MACs, 
+              (0): CNNBlock(
+                56.45 k, 0.604% Params, 115.61 MMac, 0.985% MACs, 
+                (cnn): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 96, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                6.34 k, 0.068% Params, 12.98 MMac, 0.111% MACs, 
+                (cnn): Conv2d(5.18 k, 0.055% Params, 10.62 MMac, 0.090% MACs, 576, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=576, bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 576, 96, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(192, 0.002% Params, 393.22 KMac, 0.003% MACs, 96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.15000000000000002, mode=row)
+          )
+        )
+        (5): Sequential(
+          1.13 M, 12.140% Params, 2.32 GMac, 19.792% MACs, 
+          (0): MBConv(
+            150.61 k, 1.612% Params, 308.45 MMac, 2.628% MACs, 
+            (block): Sequential(
+              150.61 k, 1.612% Params, 308.45 MMac, 2.628% MACs, 
+              (0): CNNBlock(
+                56.45 k, 0.604% Params, 115.61 MMac, 0.985% MACs, 
+                (cnn): Conv2d(55.3 k, 0.592% Params, 113.25 MMac, 0.965% MACs, 96, 576, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                15.55 k, 0.166% Params, 31.85 MMac, 0.271% MACs, 
+                (cnn): Conv2d(14.4 k, 0.154% Params, 29.49 MMac, 0.251% MACs, 576, 576, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=576, bias=False)
+                (bn): BatchNorm2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 576, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(78.34 k, 0.839% Params, 160.43 MMac, 1.367% MACs, 576, 136, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(272, 0.003% Params, 557.06 KMac, 0.005% MACs, 136, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.1625, mode=row)
+          )
+          (1): MBConv(
+            245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+            (block): Sequential(
+              245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+              (0): CNNBlock(
+                112.61 k, 1.205% Params, 230.62 MMac, 1.965% MACs, 
+                (cnn): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 136, 816, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                22.03 k, 0.236% Params, 45.12 MMac, 0.384% MACs, 
+                (cnn): Conv2d(20.4 k, 0.218% Params, 41.78 MMac, 0.356% MACs, 816, 816, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=816, bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 816, 136, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(272, 0.003% Params, 557.06 KMac, 0.005% MACs, 136, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.17500000000000002, mode=row)
+          )
+          (2): MBConv(
+            245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+            (block): Sequential(
+              245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+              (0): CNNBlock(
+                112.61 k, 1.205% Params, 230.62 MMac, 1.965% MACs, 
+                (cnn): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 136, 816, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                22.03 k, 0.236% Params, 45.12 MMac, 0.384% MACs, 
+                (cnn): Conv2d(20.4 k, 0.218% Params, 41.78 MMac, 0.356% MACs, 816, 816, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=816, bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 816, 136, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(272, 0.003% Params, 557.06 KMac, 0.005% MACs, 136, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.1875, mode=row)
+          )
+          (3): MBConv(
+            245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+            (block): Sequential(
+              245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+              (0): CNNBlock(
+                112.61 k, 1.205% Params, 230.62 MMac, 1.965% MACs, 
+                (cnn): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 136, 816, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                22.03 k, 0.236% Params, 45.12 MMac, 0.384% MACs, 
+                (cnn): Conv2d(20.4 k, 0.218% Params, 41.78 MMac, 0.356% MACs, 816, 816, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=816, bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 816, 136, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(272, 0.003% Params, 557.06 KMac, 0.005% MACs, 136, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.2, mode=row)
+          )
+          (4): MBConv(
+            245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+            (block): Sequential(
+              245.89 k, 2.632% Params, 503.58 MMac, 4.291% MACs, 
+              (0): CNNBlock(
+                112.61 k, 1.205% Params, 230.62 MMac, 1.965% MACs, 
+                (cnn): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 136, 816, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                22.03 k, 0.236% Params, 45.12 MMac, 0.384% MACs, 
+                (cnn): Conv2d(20.4 k, 0.218% Params, 41.78 MMac, 0.356% MACs, 816, 816, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=816, bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 816, 136, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(272, 0.003% Params, 557.06 KMac, 0.005% MACs, 136, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.21250000000000002, mode=row)
+          )
+        )
+        (6): Sequential(
+          3.76 M, 40.227% Params, 2.1 GMac, 17.869% MACs, 
+          (0): MBConv(
+            324.42 k, 3.473% Params, 339.07 MMac, 2.889% MACs, 
+            (block): Sequential(
+              324.42 k, 3.473% Params, 339.07 MMac, 2.889% MACs, 
+              (0): CNNBlock(
+                112.61 k, 1.205% Params, 230.62 MMac, 1.965% MACs, 
+                (cnn): Conv2d(110.98 k, 1.188% Params, 227.28 MMac, 1.937% MACs, 136, 816, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 3.34 MMac, 0.028% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                22.03 k, 0.236% Params, 11.28 MMac, 0.096% MACs, 
+                (cnn): Conv2d(20.4 k, 0.218% Params, 10.44 MMac, 0.089% MACs, 816, 816, kernel_size=(5, 5), stride=(2, 2), padding=(2, 2), groups=816, bias=False)
+                (bn): BatchNorm2d(1.63 k, 0.017% Params, 835.58 KMac, 0.007% MACs, 816, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(189.31 k, 2.026% Params, 96.93 MMac, 0.826% MACs, 816, 232, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(464, 0.005% Params, 237.57 KMac, 0.002% MACs, 232, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.225, mode=row)
+          )
+          (1): MBConv(
+            686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+            (block): Sequential(
+              686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+              (0): CNNBlock(
+                325.73 k, 3.487% Params, 166.77 MMac, 1.421% MACs, 
+                (cnn): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 232, 1392, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                37.58 k, 0.402% Params, 19.24 MMac, 0.164% MACs, 
+                (cnn): Conv2d(34.8 k, 0.373% Params, 17.82 MMac, 0.152% MACs, 1392, 1392, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=1392, bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 1392, 232, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(464, 0.005% Params, 237.57 KMac, 0.002% MACs, 232, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.23750000000000002, mode=row)
+          )
+          (2): MBConv(
+            686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+            (block): Sequential(
+              686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+              (0): CNNBlock(
+                325.73 k, 3.487% Params, 166.77 MMac, 1.421% MACs, 
+                (cnn): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 232, 1392, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                37.58 k, 0.402% Params, 19.24 MMac, 0.164% MACs, 
+                (cnn): Conv2d(34.8 k, 0.373% Params, 17.82 MMac, 0.152% MACs, 1392, 1392, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=1392, bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 1392, 232, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(464, 0.005% Params, 237.57 KMac, 0.002% MACs, 232, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.25, mode=row)
+          )
+          (3): MBConv(
+            686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+            (block): Sequential(
+              686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+              (0): CNNBlock(
+                325.73 k, 3.487% Params, 166.77 MMac, 1.421% MACs, 
+                (cnn): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 232, 1392, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                37.58 k, 0.402% Params, 19.24 MMac, 0.164% MACs, 
+                (cnn): Conv2d(34.8 k, 0.373% Params, 17.82 MMac, 0.152% MACs, 1392, 1392, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=1392, bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 1392, 232, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(464, 0.005% Params, 237.57 KMac, 0.002% MACs, 232, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.2625, mode=row)
+          )
+          (4): MBConv(
+            686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+            (block): Sequential(
+              686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+              (0): CNNBlock(
+                325.73 k, 3.487% Params, 166.77 MMac, 1.421% MACs, 
+                (cnn): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 232, 1392, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                37.58 k, 0.402% Params, 19.24 MMac, 0.164% MACs, 
+                (cnn): Conv2d(34.8 k, 0.373% Params, 17.82 MMac, 0.152% MACs, 1392, 1392, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=1392, bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 1392, 232, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(464, 0.005% Params, 237.57 KMac, 0.002% MACs, 232, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.275, mode=row)
+          )
+          (5): MBConv(
+            686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+            (block): Sequential(
+              686.72 k, 7.351% Params, 351.6 MMac, 2.996% MACs, 
+              (0): CNNBlock(
+                325.73 k, 3.487% Params, 166.77 MMac, 1.421% MACs, 
+                (cnn): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 232, 1392, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                37.58 k, 0.402% Params, 19.24 MMac, 0.164% MACs, 
+                (cnn): Conv2d(34.8 k, 0.373% Params, 17.82 MMac, 0.152% MACs, 1392, 1392, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=1392, bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 1392, 232, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(464, 0.005% Params, 237.57 KMac, 0.002% MACs, 232, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.28750000000000003, mode=row)
+          )
+        )
+        (7): Sequential(
+          2.68 M, 28.650% Params, 1.37 GMac, 11.677% MACs, 
+          (0): MBConv(
+            876.34 k, 9.380% Params, 448.68 MMac, 3.823% MACs, 
+            (block): Sequential(
+              876.34 k, 9.380% Params, 448.68 MMac, 3.823% MACs, 
+              (0): CNNBlock(
+                325.73 k, 3.487% Params, 166.77 MMac, 1.421% MACs, 
+                (cnn): Conv2d(322.94 k, 3.457% Params, 165.35 MMac, 1.409% MACs, 232, 1392, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                15.31 k, 0.164% Params, 7.84 MMac, 0.067% MACs, 
+                (cnn): Conv2d(12.53 k, 0.134% Params, 6.41 MMac, 0.055% MACs, 1392, 1392, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1392, bias=False)
+                (bn): BatchNorm2d(2.78 k, 0.030% Params, 1.43 MMac, 0.012% MACs, 1392, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(534.53 k, 5.722% Params, 273.68 MMac, 2.332% MACs, 1392, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(768, 0.008% Params, 393.22 KMac, 0.003% MACs, 384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.30000000000000004, mode=row)
+          )
+          (1): MBConv(
+            1.8 M, 19.270% Params, 921.7 MMac, 7.854% MACs, 
+            (block): Sequential(
+              1.8 M, 19.270% Params, 921.7 MMac, 7.854% MACs, 
+              (0): CNNBlock(
+                889.34 k, 9.520% Params, 455.34 MMac, 3.880% MACs, 
+                (cnn): Conv2d(884.74 k, 9.470% Params, 452.98 MMac, 3.860% MACs, 384, 2304, kernel_size=(1, 1), stride=(1, 1), bias=False)
+                (bn): BatchNorm2d(4.61 k, 0.049% Params, 2.36 MMac, 0.020% MACs, 2304, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (1): CNNBlock(
+                25.34 k, 0.271% Params, 12.98 MMac, 0.111% MACs, 
+                (cnn): Conv2d(20.74 k, 0.222% Params, 10.62 MMac, 0.090% MACs, 2304, 2304, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=2304, bias=False)
+                (bn): BatchNorm2d(4.61 k, 0.049% Params, 2.36 MMac, 0.020% MACs, 2304, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+                (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+              )
+              (2): Conv2d(884.74 k, 9.470% Params, 452.98 MMac, 3.860% MACs, 2304, 384, kernel_size=(1, 1), stride=(1, 1), bias=False)
+              (3): BatchNorm2d(768, 0.008% Params, 393.22 KMac, 0.003% MACs, 384, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+            (stochastic_depth): StochasticDepth(p=0.3125, mode=row)
+          )
+        )
+        (8): CNNBlock(
+          592.9 k, 6.346% Params, 303.56 MMac, 2.587% MACs, 
+          (cnn): Conv2d(589.82 k, 6.314% Params, 301.99 MMac, 2.573% MACs, 384, 1536, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (bn): BatchNorm2d(3.07 k, 0.033% Params, 1.57 MMac, 0.013% MACs, 1536, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (silu): SiLU(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+        )
+      )
+    )
+    (fpn): FPN(
+      458.75 k, 4.911% Params, 730.73 MMac, 6.227% MACs, 
+      (lat_conv2): Conv2d(7.42 k, 0.079% Params, 243.27 MMac, 2.073% MACs, 28, 256, kernel_size=(1, 1), stride=(1, 1))
+      (lat_conv3): Conv2d(12.54 k, 0.134% Params, 102.76 MMac, 0.876% MACs, 48, 256, kernel_size=(1, 1), stride=(1, 1))
+      (lat_conv4): Conv2d(35.07 k, 0.375% Params, 71.83 MMac, 0.612% MACs, 136, 256, kernel_size=(1, 1), stride=(1, 1))
+      (lat_conv5): Conv2d(393.47 k, 4.212% Params, 201.46 MMac, 1.717% MACs, 1536, 256, kernel_size=(1, 1), stride=(1, 1))
+      (output_conv2): Conv2d(2.56 k, 0.027% Params, 83.89 MMac, 0.715% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+      (output_conv3): Conv2d(2.56 k, 0.027% Params, 20.97 MMac, 0.179% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+      (output_conv4): Conv2d(2.56 k, 0.027% Params, 5.24 MMac, 0.045% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+      (output_conv5): Conv2d(2.56 k, 0.027% Params, 1.31 MMac, 0.011% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+    )
+  )
+  (proposal_generator): RPN(
+    6.4 k, 0.069% Params, 280.0 MMac, 2.386% MACs, 
+    (rpn_head): RPN_Head(
+      6.4 k, 0.069% Params, 280.0 MMac, 2.386% MACs, 
+      (conv): Conv2d(2.56 k, 0.027% Params, 111.74 MMac, 0.952% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+      (objness_logit_conv): Sequential(
+        768, 0.008% Params, 33.65 MMac, 0.287% MACs, 
+        (0): Conv2d(768, 0.008% Params, 33.52 MMac, 0.286% MACs, 256, 3, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        (1): LeakyReLU(0, 0.000% Params, 130.94 KMac, 0.001% MACs, negative_slope=0.01)
+      )
+      (anchor_delta_conv): Sequential(
+        3.07 k, 0.033% Params, 134.61 MMac, 1.147% MACs, 
+        (0): Conv2d(3.07 k, 0.033% Params, 134.09 MMac, 1.143% MACs, 256, 12, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        (1): LeakyReLU(0, 0.000% Params, 523.78 KMac, 0.004% MACs, negative_slope=0.01)
+      )
+    )
+    (anchor_generator): Anchor_Generator(0, 0.000% Params, 0.0 Mac, 0.000% MACs, )
+  )
+  (roi_heads): Standard_ROI_Heads(
+    55.6 k, 0.595% Params, 560.03 MMac, 4.772% MACs, 
+    (box_pooler): ROI_Pooler(
+      0, 0.000% Params, 0.0 Mac, 0.000% MACs, 
+      (level_poolers): ModuleList(
+        (0): ROIAlign(output_size=(7, 7), spatial_scale=0.25, sampling_ratio=0, aligned=True)
+        (1): ROIAlign(output_size=(7, 7), spatial_scale=0.125, sampling_ratio=0, aligned=True)
+        (2): ROIAlign(output_size=(7, 7), spatial_scale=0.0625, sampling_ratio=0, aligned=True)
+        (3): ROIAlign(output_size=(7, 7), spatial_scale=0.03125, sampling_ratio=0, aligned=True)
+      )
+    )
+    (box_head): Fast_RCNN_Conv_AP_Head(
+      0, 0.000% Params, 15.62 MMac, 0.133% MACs, 
+      (flatten): Flatten(0, 0.000% Params, 0.0 Mac, 0.000% MACs, start_dim=1, end_dim=-1)
+      (avg_pool1): AdaptiveAvgPool1d(0, 0.000% Params, 12.54 MMac, 0.107% MACs, output_size=1024)
+      (avg_pool_relu1): LeakyReLU(0, 0.000% Params, 1.02 MMac, 0.009% MACs, negative_slope=0.01)
+      (avg_pool2): AdaptiveAvgPool1d(0, 0.000% Params, 1.02 MMac, 0.009% MACs, output_size=1024)
+      (avg_pool_relu2): LeakyReLU(0, 0.000% Params, 1.02 MMac, 0.009% MACs, negative_slope=0.01)
+    )
+    (box_predictor): Fast_RCNN_Output_Layers(
+      42.02 k, 0.450% Params, 42.02 MMac, 0.358% MACs, 
+      (cls_score): Linear(9.22 k, 0.099% Params, 9.22 MMac, 0.079% MACs, in_features=1024, out_features=9, bias=True)
+      (bbox_pred): Linear(32.8 k, 0.351% Params, 32.8 MMac, 0.279% MACs, in_features=1024, out_features=32, bias=True)
+    )
+    (mask_pooler): ROI_Pooler(
+      0, 0.000% Params, 0.0 Mac, 0.000% MACs, 
+      (level_poolers): ModuleList(
+        (0): ROIAlign(output_size=(14, 14), spatial_scale=0.25, sampling_ratio=0, aligned=True)
+        (1): ROIAlign(output_size=(14, 14), spatial_scale=0.125, sampling_ratio=0, aligned=True)
+        (2): ROIAlign(output_size=(14, 14), spatial_scale=0.0625, sampling_ratio=0, aligned=True)
+        (3): ROIAlign(output_size=(14, 14), spatial_scale=0.03125, sampling_ratio=0, aligned=True)
+      )
+    )
+    (mask_head): Mask_RCNN_Conv_Upsample_Head(
+      13.58 k, 0.145% Params, 502.39 MMac, 4.281% MACs, 
+      (mask_fcn1): Sequential(
+        2.56 k, 0.027% Params, 55.19 MMac, 0.470% MACs, 
+        (0): Conv2d(2.56 k, 0.027% Params, 50.18 MMac, 0.428% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+        (1): LeakyReLU(0, 0.000% Params, 5.02 MMac, 0.043% MACs, negative_slope=0.01)
+      )
+      (mask_fcn2): Sequential(
+        2.56 k, 0.027% Params, 55.19 MMac, 0.470% MACs, 
+        (0): Conv2d(2.56 k, 0.027% Params, 50.18 MMac, 0.428% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+        (1): LeakyReLU(0, 0.000% Params, 5.02 MMac, 0.043% MACs, negative_slope=0.01)
+      )
+      (mask_fcn3): Sequential(
+        2.56 k, 0.027% Params, 55.19 MMac, 0.470% MACs, 
+        (0): Conv2d(2.56 k, 0.027% Params, 50.18 MMac, 0.428% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+        (1): LeakyReLU(0, 0.000% Params, 5.02 MMac, 0.043% MACs, negative_slope=0.01)
+      )
+      (mask_fcn4): Sequential(
+        2.56 k, 0.027% Params, 55.19 MMac, 0.470% MACs, 
+        (0): Conv2d(2.56 k, 0.027% Params, 50.18 MMac, 0.428% MACs, 256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=256)
+        (1): LeakyReLU(0, 0.000% Params, 5.02 MMac, 0.043% MACs, negative_slope=0.01)
+      )
+      (deconv): ConvTranspose2d(1.28 k, 0.014% Params, 100.35 MMac, 0.855% MACs, 256, 256, kernel_size=(2, 2), stride=(2, 2), groups=256)
+      (deconv_relu): LeakyReLU(0, 0.000% Params, 20.07 MMac, 0.171% MACs, negative_slope=0.01)
+      (predictor): Conv2d(2.06 k, 0.022% Params, 161.19 MMac, 1.374% MACs, 256, 8, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (sem_seg_head): SemSeg_FPN_Head(
+    17.69 k, 0.189% Params, 265.91 MMac, 2.266% MACs, 
+    (P2): Sequential(
+      2.56 k, 0.027% Params, 88.08 MMac, 0.751% MACs, 
+      (0): Sequential(
+        2.56 k, 0.027% Params, 88.08 MMac, 0.751% MACs, 
+        (0): Conv2d(2.3 k, 0.025% Params, 75.5 MMac, 0.643% MACs, 256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 8.39 MMac, 0.071% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 4.19 MMac, 0.036% MACs, negative_slope=0.01)
+      )
+    )
+    (P3): Sequential(
+      2.56 k, 0.027% Params, 26.21 MMac, 0.223% MACs, 
+      (0): Sequential(
+        2.56 k, 0.027% Params, 22.02 MMac, 0.188% MACs, 
+        (0): Conv2d(2.3 k, 0.025% Params, 18.87 MMac, 0.161% MACs, 256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 2.1 MMac, 0.018% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 1.05 MMac, 0.009% MACs, negative_slope=0.01)
+      )
+      (1): Upsample(0, 0.000% Params, 4.19 MMac, 0.036% MACs, scale_factor=2.0, mode='bilinear')
+    )
+    (P4): Sequential(
+      3.97 k, 0.042% Params, 23.33 MMac, 0.199% MACs, 
+      (0): Sequential(
+        2.56 k, 0.027% Params, 5.51 MMac, 0.047% MACs, 
+        (0): Conv2d(2.3 k, 0.025% Params, 4.72 MMac, 0.040% MACs, 256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 524.29 KMac, 0.004% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 262.14 KMac, 0.002% MACs, negative_slope=0.01)
+      )
+      (1): Upsample(0, 0.000% Params, 1.05 MMac, 0.009% MACs, scale_factor=2.0, mode='bilinear')
+      (2): Sequential(
+        1.41 k, 0.015% Params, 12.58 MMac, 0.107% MACs, 
+        (0): Conv2d(1.15 k, 0.012% Params, 9.44 MMac, 0.080% MACs, 128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 2.1 MMac, 0.018% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 1.05 MMac, 0.009% MACs, negative_slope=0.01)
+      )
+      (3): Upsample(0, 0.000% Params, 4.19 MMac, 0.036% MACs, scale_factor=2.0, mode='bilinear')
+    )
+    (P5): Sequential(
+      5.38 k, 0.058% Params, 22.61 MMac, 0.193% MACs, 
+      (0): Sequential(
+        2.56 k, 0.027% Params, 1.38 MMac, 0.012% MACs, 
+        (0): Conv2d(2.3 k, 0.025% Params, 1.18 MMac, 0.010% MACs, 256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 131.07 KMac, 0.001% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 65.54 KMac, 0.001% MACs, negative_slope=0.01)
+      )
+      (1): Upsample(0, 0.000% Params, 262.14 KMac, 0.002% MACs, scale_factor=2.0, mode='bilinear')
+      (2): Sequential(
+        1.41 k, 0.015% Params, 3.15 MMac, 0.027% MACs, 
+        (0): Conv2d(1.15 k, 0.012% Params, 2.36 MMac, 0.020% MACs, 128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 524.29 KMac, 0.004% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 262.14 KMac, 0.002% MACs, negative_slope=0.01)
+      )
+      (3): Upsample(0, 0.000% Params, 1.05 MMac, 0.009% MACs, scale_factor=2.0, mode='bilinear')
+      (4): Sequential(
+        1.41 k, 0.015% Params, 12.58 MMac, 0.107% MACs, 
+        (0): Conv2d(1.15 k, 0.012% Params, 9.44 MMac, 0.080% MACs, 128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=128, bias=False)
+        (1): GroupNorm(256, 0.003% Params, 2.1 MMac, 0.018% MACs, 32, 128, eps=1e-05, affine=True)
+        (2): LeakyReLU(0, 0.000% Params, 1.05 MMac, 0.009% MACs, negative_slope=0.01)
+      )
+      (5): Upsample(0, 0.000% Params, 4.19 MMac, 0.036% MACs, scale_factor=2.0, mode='bilinear')
+    )
+    (predictor): Conv2d(3.23 k, 0.035% Params, 105.68 MMac, 0.900% MACs, 128, 25, kernel_size=(1, 1), stride=(1, 1))
+  )
+)
+Computational complexity:       11.74 GMac
+Number of parameters:           9.34 M  
